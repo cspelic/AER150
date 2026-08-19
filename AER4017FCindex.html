@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>flashcards (1) — Flashcards</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#F3F0E7;--paper-alt:#ECE6D6;--card:#FFFFFF;--ink:#23201A;--ink-soft:#5B564A;--accent:#145A4A;--accent-dark:#0E463A;--accent-tab:#8B3A2F;--rule:#D9D2C1;--focus:#0E463A;--radius:10px;font-size:16px;}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{background:var(--paper);color:var(--ink);font-family:'Public Sans',system-ui,sans-serif;line-height:1.5;min-height:100vh;}
+h1{font-family:'Public Sans',system-ui,sans-serif;font-weight:800;letter-spacing:-.01em;margin:0 0 .3em;}
+.mono{font-family:'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.02em;}
+.skip-link{position:absolute;left:-999px;top:0;background:var(--accent-dark);color:#fff;padding:.75em 1.25em;z-index:100;border-radius:0 0 8px 0;font-weight:600;}
+.skip-link:focus{left:0;}
+:focus-visible{outline:3px solid var(--focus);outline-offset:3px;}
+header.top{border-bottom:2px solid var(--ink);padding:1.75rem 1.5rem 1.25rem;max-width:700px;margin:0 auto;}
+header.top .eyebrow{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:.8rem;letter-spacing:.12em;text-transform:uppercase;color:var(--accent-dark);background:var(--paper-alt);border:1px solid var(--rule);padding:.2em .6em;border-radius:4px;margin-bottom:.6rem;}
+main{max-width:700px;margin:0 auto;padding:1.5rem;}
+.deck-meta{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.6rem;margin-bottom:1rem;}
+.stage{perspective:1400px;max-width:560px;margin:0 auto 1.25rem;}
+.card-face{position:relative;width:100%;min-height:260px;border-radius:var(--radius);background:transparent;border:none;padding:0;cursor:pointer;display:block;}
+.card-inner{display:block;position:relative;width:100%;height:100%;min-height:260px;transition:transform .5s cubic-bezier(.4,.2,.2,1);transform-style:preserve-3d;}
+.card-face[aria-pressed="true"] .card-inner{transform:rotateY(180deg);}
+.face{position:absolute;inset:0;background:var(--card);border:1.5px solid var(--rule);border-radius:var(--radius);box-shadow:0 2px 0 var(--rule),0 10px 24px -12px rgba(35,32,26,.35);padding:2rem 1.75rem;display:flex;flex-direction:column;backface-visibility:hidden;-webkit-backface-visibility:hidden;}
+.face::before{content:"";position:absolute;left:1.75rem;right:1.75rem;top:3.2rem;height:2px;background:repeating-linear-gradient(to right,var(--rule) 0 10px,transparent 10px 16px);}
+.face .tag{font-family:'IBM Plex Mono',monospace;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:#fff;background:var(--accent-tab);padding:.25em .6em;border-radius:3px 3px 3px 0;}
+.face-badges{display:flex;align-items:center;gap:.5rem;align-self:flex-start;margin-bottom:1.4rem;}
+.verified-stamp-wrap{position:absolute;right:1.1rem;bottom:1.1rem;transform:rotate(-9deg);pointer-events:none;}
+.verified-stamp-ring{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.2rem;width:76px;height:76px;border-radius:50%;border:2px solid var(--accent);box-shadow:inset 0 0 0 3px var(--paper),inset 0 0 0 5px var(--accent);color:var(--accent);opacity:.88;}
+.verified-stamp-ring svg{flex:none;}
+.verified-stamp-text{font-family:'Public Sans',sans-serif;font-weight:800;font-size:.5rem;line-height:1.2;letter-spacing:.06em;text-align:center;text-transform:uppercase;}
+.face.back .tag{background:var(--accent-dark);}
+.face .content{font-family:'Public Sans',system-ui,sans-serif;font-weight:500;font-size:1.3rem;line-height:1.45;flex:1;display:flex;align-items:center;overflow-wrap:anywhere;}
+.face .idx{position:absolute;top:.9rem;right:1rem;font-family:'IBM Plex Mono',monospace;font-size:.75rem;color:var(--ink-soft);}
+.face.back{transform:rotateY(180deg);}
+.controls{display:flex;justify-content:center;align-items:center;gap:.6rem;flex-wrap:wrap;}
+.btn{font-family:'Public Sans',sans-serif;font-weight:600;font-size:.95rem;border-radius:8px;border:1.5px solid var(--accent-dark);background:var(--accent);color:#fff;padding:.7em 1.3em;min-height:44px;cursor:pointer;}
+.btn:hover{background:var(--accent-dark);}
+.btn.secondary{background:var(--card);color:var(--accent-dark);}
+.btn.secondary:hover{background:var(--paper-alt);}
+.btn:disabled{opacity:.5;cursor:not-allowed;}
+.hint{color:var(--ink-soft);font-size:.9rem;text-align:center;}
+#sr-status{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;}
+@media (prefers-reduced-motion: reduce){.card-inner{transition:none;}}
+@media (max-width:500px){.face .content{font-size:1.2rem;}}
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to main content</a>
+<header class="top">
+<span class="eyebrow">Catalog Drawer</span>
+<h1>flashcards (1)</h1>
+</header>
+<main id="main">
+<div class="deck-meta"><span class="mono" id="progress"></span></div>
+<div class="stage">
+<button type="button" class="card-face" id="card-btn" aria-pressed="false">
+<span class="card-inner" id="card-inner">
+<span class="face front"><span class="idx mono" id="idx-front"></span><span class="face-badges"><span class="tag">Question</span></span><span class="content" id="front-text"></span></span>
+<span class="face back" aria-hidden="true"><span class="idx mono" id="idx-back"></span><span class="face-badges"><span class="tag">Answer</span></span><span class="content" id="back-text"></span><span class="verified-stamp-wrap" aria-hidden="true"><span class="verified-stamp-ring"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="verified-stamp-text">Verified<br>Correct</span></span></span></span>
+</span>
+</button>
+</div>
+<div class="controls">
+<button type="button" class="btn secondary" id="prev-btn">← Previous</button>
+<button type="button" class="btn" id="flip-btn">Flip card</button>
+<button type="button" class="btn secondary" id="next-btn">Next →</button>
+<button type="button" class="btn secondary" id="shuffle-btn">Shuffle</button>
+</div>
+<p class="hint">Press <kbd>Space</kbd> or <kbd>Enter</kbd> on the focused card to flip it, and use the ←/→ arrow keys to move between cards.</p>
+<div id="sr-status" aria-live="polite"></div>
+</main>
+<script>
+(function(){
+"use strict";
+var cards = [{"front":"Assembly Stage: Locating Resources","back":"Obtain drill motors, drill bits, and precision measuring tools from the centralized tool crib."},{"front":"Assembly Stage: Verifying Measuring Tools","back":"Check for valid calibration tags on torque wrenches, micrometers, and countersink gauges."},{"front":"Assembly Stage: Verifying Drill Motors","back":"Test run the motor off the workpiece to confirm vibration-free operation at the required RPM."},{"front":"Assembly Stage: Marking Fastener Locations","back":"Interpret engineering drawings for part numbers, hole diameters, and edge distances before marking."},{"front":"Assembly Stage: Transferring Hole Locations","back":"Use a steel rule and square to transfer precise dimensions from the drawing to the workpiece."},{"front":"Assembly Stage: Center Punching","back":"Create a firm indentation at the exact hole center to prevent the drill bit from walking."},{"front":"Assembly Stage: Setting Drill Motor RPM","back":"Adjust speed based on the specific material type and drill bit diameter being used."},{"front":"Assembly Stage: Securing the Workpiece","back":"Clamp the assembly firmly to prevent it from spinning if the drill bit catches the material."},{"front":"Assembly Stage: Drilling Pilot Holes","back":"Select a starter bit with a diameter between $\\frac{1}{3}$ and $\\frac{1}{2}$ of the final hole size."},{"front":"Assembly Stage: Aligning the Drill Motor","back":"Hold the tool at exactly $90^{\\circ}$ to the surface to avoid creating an oval or weakened joint."},{"front":"Assembly Stage: Applying Feed Pressure","back":"Maintain steady, moderate pressure to let the bit cut without causing heat buildup or work hardening."},{"front":"Assembly Stage: Clearing Metal Chips","back":"Periodically withdraw the drill bit from the hole to prevent chip packing and bit breakage."},{"front":"Assembly Stage: Enlarging Pilot Holes","back":"Use the step-drilling method to incrementally increase diameter up to the final specification."},{"front":"Assembly Stage: Verifying Final Hole Size","back":"Perform a Go/No-Go check using calibrated pin gauges of the minimum and maximum diameters."},{"front":"Assembly Stage: Inspecting for Pilot Hole Defects","back":"Visually check for off-location, oversized, or rough-walled holes before enlarging them."},{"front":"Assembly Stage: Setting Countersink Depth","back":"Adjust the micrometer stop ring on the cage and verify depth on a piece of scrap material."},{"front":"Assembly Stage: Applying the Countersink Cage","back":"Insert the cage pilot into the hole and engage the motor at low speed until the foot stops."},{"front":"Assembly Stage: Verifying Countersink Flushness","back":"Check the depth with a flush pin gauge to ensure a tolerance of $+0.000$ to $-0.002$ inch."},{"front":"Assembly Stage: Disassembling the Assembly","back":"Remove all Cleco fasteners using pliers to clear trapped metal shavings from mating surfaces."},{"front":"Assembly Stage: Organizing Disassembled Parts","back":"Mark mating surfaces with removable markers to ensure reassembly in the correct orientation."},{"front":"Assembly Stage: Deburring Entry and Exit Sides","back":"Remove sharp edges from both the top and bottom of every drilled hole in the assembly."},{"front":"Assembly Stage: Deburring Aluminum Holes","back":"Rotate a swivel-blade hand tool around the hole edge using light, consistent pressure."},{"front":"Assembly Stage: Deburring Composite Panels","back":"Use sharp carbide or diamond tools at low speed with vacuum extraction for carbon dust."},{"front":"Assembly Stage: Final Inspection Before Reassembly","back":"Perform a fingertip check for sharpness and a visual check for cracks around every hole."},{"front":"Assembly Stage: Final Cleaning","back":"Wipe all parts with an approved solvent to remove chips, cutting fluid, and fingerprints."},{"front":"What documentation is the authoritative source for fastener types, hole sizes, and locations?","back":"The engineering drawing (or blueprint)."},{"front":"Under what condition must a tool be immediately removed from service?","back":"If the tool is damaged, defective, or past its calibration due date."},{"front":"What is the minimum safety requirement for eye protection in a drilling environment?","back":"Safety glasses equipped with side shields."},{"front":"When should cut-resistant gloves NOT be worn during assembly?","back":"When operating rotating equipment, unless specifically approved for the task."},{"front":"How is 'edge distance' (E.D.) defined in aircraft assembly?","back":"The distance from the center of the hole to the nearest edge of the material."},{"front":"What is the typical minimum edge distance required for a fastener hole?","back":"$2 \\times$ the fastener diameter."},{"front":"What is the typical minimum 'pitch' (spacing) between adjacent fastener holes?","back":"$3 \\times$ the fastener diameter."},{"front":"Concept: Transverse Pitch","back":"Definition: The center-to-center distance between adjacent rows of fasteners."},{"front":"Why must scribes be used with extreme caution on aluminum alloys?","back":"Scribing too deeply can initiate stress cracks in the material."},{"front":"What is the recommended RPM range for drilling Aluminum Alloy ($2024$, $7075$)?","back":"$2,000$ – $4,000$ RPM."},{"front":"What is the recommended RPM range for drilling Stainless Steel?","back":"$300$ – $700$ RPM."},{"front":"What is the recommended RPM range for drilling Titanium Alloy?","back":"$200$ – $500$ RPM."},{"front":"Which material type prohibits the use of cutting fluid during drilling?","back":"Carbon fiber reinforced polymer (CFRP) composites."},{"front":"What hole sizing system uses the labels #$80$ (smallest) to #$1$ (largest)?","back":"Number Drills (Wire Gauge)."},{"front":"What hole sizing system covers the $0.234$ to $0.413$ inch range using letters A through Z?","back":"Letter Drills."},{"front":"What is the typical maximum allowable oversize tolerance for a standard fastener hole?","back":"$+0.003$ inch."},{"front":"What is the minimum undersize tolerance for aircraft structural holes?","back":"$0.000$ inch (holes may never be undersized)."},{"front":"Term: Countersinking","back":"Definition: The process of creating a conical recess to allow flush fasteners to sit level with the surface."},{"front":"What is the most common countersink angle for aircraft aluminum structural rivets?","back":"$100^{\\circ}$."},{"front":"What is the standard countersink angle used for machine screws?","back":"$82^{\\circ}$."},{"front":"Term: Proud Head","back":"Definition: A condition where the fastener head protrudes above the material surface due to a shallow countersink."},{"front":"Concept: Knife-Edge Condition","back":"Definition: A structural defect where countersinking depth leaves the remaining hole wall paper-thin."},{"front":"What is the typical minimum remaining edge thickness allowed to prevent a knife-edge defect?","back":"$0.020$ to $0.030$ inch."},{"front":"What are 'Cleco' fasteners?","back":"Spring-loaded temporary fasteners used to hold parts in alignment during drilling."},{"front":"Which Cleco color is used for holes that are $\\frac{1}{8}$ inch in diameter?","back":"Copper (or Bronze)."},{"front":"Which Cleco color is used for holes that are $\\frac{3}{32}$ inch in diameter?","back":"Silver."},{"front":"Which Cleco color is used for holes that are $\\frac{3}{16}$ inch in diameter?","back":"Gold (or Yellow)."},{"front":"Which Cleco color is used for holes that are $\\frac{5}{32}$ inch in diameter?","back":"Black."},{"front":"Term: Burr","back":"Definition: A raised, sharp edge of metal left at the rim of a hole after drilling."},{"front":"What is the primary structural risk of leaving metal chips between mating 'faying' surfaces?","back":"Fretting, which causes corrosion and accelerates fatigue failure."},{"front":"Why is vacuum extraction mandatory when deburring carbon fiber composite parts?","back":"To contain carbon dust, which is a significant respiratory health hazard."},{"front":"What PPE is required specifically for handling composite dust besides safety glasses?","back":"An NIOSH-approved respirator (N95 minimum) and nitrile gloves."},{"front":"What simple manual test verifies if a hole is properly deburred?","back":"Running a fingertip around the hole edge to ensure it is smooth and does not catch."},{"front":"What is the risk of using excessive speed or pressure when deburring composites?","back":"The brittle material may crack, delaminate, or experience fiber breakout."},{"front":"When should an assembler stop work and consult a supervisor or quality engineer?","back":"Whenever a dimension is unclear, a tool is defective, or a drawing appears to conflict with instructions."},{"front":"What is the consequence of drilling a hole that exceeds the required perpendicularity by more than $2^{\\circ}$?","back":"It creates an oblong hole that compromises fastener fit and clamp-up force."},{"front":"How should Cleco fasteners be removed to relief residual clamp stress?","back":"Remove them one by one, starting from the center of the assembly and working outward."},{"front":"What is the purpose of applying 'CIC' or sealant to faying surfaces after disassembly?","back":"To inhibit corrosion between the mating individual parts of the assembly."},{"front":"A Go/No-Go pin gauge test is considered _____.","back":"a mandatory quality checkpoint (not optional)."},{"front":"What resolution is typically required when measuring hole diameters with an inside micrometer?","back":"$0.0001$ inch."}];
+var order = cards.map(function(_, i){ return i; });
+var current = 0;
+var cardBtn = document.getElementById("card-btn");
+var frontText = document.getElementById("front-text");
+var backText = document.getElementById("back-text");
+var idxFront = document.getElementById("idx-front");
+var idxBack = document.getElementById("idx-back");
+var progressEl = document.getElementById("progress");
+var prevBtn = document.getElementById("prev-btn");
+var nextBtn = document.getElementById("next-btn");
+var flipBtn = document.getElementById("flip-btn");
+var shuffleBtn = document.getElementById("shuffle-btn");
+var srStatus = document.getElementById("sr-status");
+function shuffleArray(arr){ var a = arr.slice(); for (var i = a.length - 1; i > 0; i--){ var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+function renderCard(announce){
+  var c = cards[order[current]];
+  frontText.textContent = c.front;
+  backText.textContent = c.back;
+  idxFront.textContent = String(current + 1).padStart(3, "0");
+  idxBack.textContent = String(current + 1).padStart(3, "0");
+  cardBtn.setAttribute("aria-pressed", "false");
+  cardBtn.setAttribute("aria-label", "Question: " + c.front + ". Activate to show the answer.");
+  progressEl.textContent = "Card " + (current + 1) + " of " + cards.length;
+  if (announce) srStatus.textContent = "Card " + (current + 1) + " of " + cards.length + ". Question: " + c.front;
+  prevBtn.disabled = cards.length <= 1;
+  nextBtn.disabled = cards.length <= 1;
+}
+function flipCard(){
+  var pressed = cardBtn.getAttribute("aria-pressed") === "true";
+  var c = cards[order[current]];
+  if (pressed){
+    cardBtn.setAttribute("aria-pressed", "false");
+    cardBtn.setAttribute("aria-label", "Question: " + c.front + ". Activate to show the answer.");
+    srStatus.textContent = "Showing question: " + c.front;
+  } else {
+    cardBtn.setAttribute("aria-pressed", "true");
+    cardBtn.setAttribute("aria-label", "Verified answer: " + c.back + ". Activate to show the question.");
+    srStatus.textContent = "Showing verified answer: " + c.back;
+  }
+}
+function goTo(delta){
+  if (cards.length < 2) return;
+  current = (current + delta + cards.length) % cards.length;
+  renderCard(true);
+}
+cardBtn.addEventListener("click", flipCard);
+flipBtn.addEventListener("click", function(){ cardBtn.focus(); flipCard(); });
+prevBtn.addEventListener("click", function(){ goTo(-1); });
+nextBtn.addEventListener("click", function(){ goTo(1); });
+shuffleBtn.addEventListener("click", function(){ order = shuffleArray(order); current = 0; renderCard(false); srStatus.textContent = "Deck shuffled. Card 1 of " + cards.length; });
+document.addEventListener("keydown", function(e){
+  if (e.key === "ArrowLeft"){ e.preventDefault(); goTo(-1); }
+  else if (e.key === "ArrowRight"){ e.preventDefault(); goTo(1); }
+});
+if (cards.length){ renderCard(true); } else { progressEl.textContent = "No cards found."; }
+})();
+</script>
+</body>
+</html>
