@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>flashcards — Flashcards</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#F3F0E7;--paper-alt:#ECE6D6;--card:#FFFFFF;--ink:#23201A;--ink-soft:#5B564A;--accent:#145A4A;--accent-dark:#0E463A;--accent-tab:#8B3A2F;--rule:#D9D2C1;--focus:#0E463A;--radius:10px;font-size:16px;}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{background:var(--paper);color:var(--ink);font-family:'Public Sans',system-ui,sans-serif;line-height:1.5;min-height:100vh;}
+h1{font-family:'Public Sans',system-ui,sans-serif;font-weight:800;letter-spacing:-.01em;margin:0 0 .3em;}
+.mono{font-family:'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.02em;}
+.skip-link{position:absolute;left:-999px;top:0;background:var(--accent-dark);color:#fff;padding:.75em 1.25em;z-index:100;border-radius:0 0 8px 0;font-weight:600;}
+.skip-link:focus{left:0;}
+:focus-visible{outline:3px solid var(--focus);outline-offset:3px;}
+header.top{border-bottom:2px solid var(--ink);padding:1.75rem 1.5rem 1.25rem;max-width:700px;margin:0 auto;}
+header.top .eyebrow{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:.8rem;letter-spacing:.12em;text-transform:uppercase;color:var(--accent-dark);background:var(--paper-alt);border:1px solid var(--rule);padding:.2em .6em;border-radius:4px;margin-bottom:.6rem;}
+main{max-width:700px;margin:0 auto;padding:1.5rem;}
+.deck-meta{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.6rem;margin-bottom:1rem;}
+.stage{perspective:1400px;max-width:560px;margin:0 auto 1.25rem;}
+.card-face{position:relative;width:100%;min-height:260px;border-radius:var(--radius);background:transparent;border:none;padding:0;cursor:pointer;display:block;}
+.card-inner{display:block;position:relative;width:100%;height:100%;min-height:260px;transition:transform .5s cubic-bezier(.4,.2,.2,1);transform-style:preserve-3d;}
+.card-face[aria-pressed="true"] .card-inner{transform:rotateY(180deg);}
+.face{position:absolute;inset:0;background:var(--card);border:1.5px solid var(--rule);border-radius:var(--radius);box-shadow:0 2px 0 var(--rule),0 10px 24px -12px rgba(35,32,26,.35);padding:2rem 1.75rem;display:flex;flex-direction:column;backface-visibility:hidden;-webkit-backface-visibility:hidden;}
+.face::before{content:"";position:absolute;left:1.75rem;right:1.75rem;top:3.2rem;height:2px;background:repeating-linear-gradient(to right,var(--rule) 0 10px,transparent 10px 16px);}
+.face .tag{font-family:'IBM Plex Mono',monospace;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:#fff;background:var(--accent-tab);padding:.25em .6em;border-radius:3px 3px 3px 0;}
+.face-badges{display:flex;align-items:center;gap:.5rem;align-self:flex-start;margin-bottom:1.4rem;}
+.verified-stamp-wrap{position:absolute;right:1.1rem;bottom:1.1rem;transform:rotate(-9deg);pointer-events:none;}
+.verified-stamp-ring{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.2rem;width:76px;height:76px;border-radius:50%;border:2px solid var(--accent);box-shadow:inset 0 0 0 3px var(--paper),inset 0 0 0 5px var(--accent);color:var(--accent);opacity:.88;}
+.verified-stamp-ring svg{flex:none;}
+.verified-stamp-text{font-family:'Public Sans',sans-serif;font-weight:800;font-size:.5rem;line-height:1.2;letter-spacing:.06em;text-align:center;text-transform:uppercase;}
+.face.back .tag{background:var(--accent-dark);}
+.face .content{font-family:'Public Sans',system-ui,sans-serif;font-weight:500;font-size:1.3rem;line-height:1.45;flex:1;display:flex;align-items:center;overflow-wrap:anywhere;}
+.face .idx{position:absolute;top:.9rem;right:1rem;font-family:'IBM Plex Mono',monospace;font-size:.75rem;color:var(--ink-soft);}
+.face.back{transform:rotateY(180deg);}
+.controls{display:flex;justify-content:center;align-items:center;gap:.6rem;flex-wrap:wrap;}
+.btn{font-family:'Public Sans',sans-serif;font-weight:600;font-size:.95rem;border-radius:8px;border:1.5px solid var(--accent-dark);background:var(--accent);color:#fff;padding:.7em 1.3em;min-height:44px;cursor:pointer;}
+.btn:hover{background:var(--accent-dark);}
+.btn.secondary{background:var(--card);color:var(--accent-dark);}
+.btn.secondary:hover{background:var(--paper-alt);}
+.btn:disabled{opacity:.5;cursor:not-allowed;}
+.hint{color:var(--ink-soft);font-size:.9rem;text-align:center;}
+#sr-status{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;}
+@media (prefers-reduced-motion: reduce){.card-inner{transition:none;}}
+@media (max-width:500px){.face .content{font-size:1.2rem;}}
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to main content</a>
+<header class="top">
+<span class="eyebrow">Catalog Drawer</span>
+<h1>flashcards</h1>
+</header>
+<main id="main">
+<div class="deck-meta"><span class="mono" id="progress"></span></div>
+<div class="stage">
+<button type="button" class="card-face" id="card-btn" aria-pressed="false">
+<span class="card-inner" id="card-inner">
+<span class="face front"><span class="idx mono" id="idx-front"></span><span class="face-badges"><span class="tag">Question</span></span><span class="content" id="front-text"></span></span>
+<span class="face back" aria-hidden="true"><span class="idx mono" id="idx-back"></span><span class="face-badges"><span class="tag">Answer</span></span><span class="content" id="back-text"></span><span class="verified-stamp-wrap" aria-hidden="true"><span class="verified-stamp-ring"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="verified-stamp-text">Verified<br>Correct</span></span></span></span>
+</span>
+</button>
+</div>
+<div class="controls">
+<button type="button" class="btn secondary" id="prev-btn">← Previous</button>
+<button type="button" class="btn" id="flip-btn">Flip card</button>
+<button type="button" class="btn secondary" id="next-btn">Next →</button>
+<button type="button" class="btn secondary" id="shuffle-btn">Shuffle</button>
+</div>
+<p class="hint">Press <kbd>Space</kbd> or <kbd>Enter</kbd> on the focused card to flip it, and use the ←/→ arrow keys to move between cards.</p>
+<div id="sr-status" aria-live="polite"></div>
+</main>
+<script>
+(function(){
+"use strict";
+var cards = [{"front":"Term: Nut Plate","back":"Definition: A fixed, riveted fastener that allows a bolt or screw to be removed repeatedly without needing a back wrench."},{"front":"What is the common term used for a nut plate in military or older aviation documentation?","back":"Anchor Nut"},{"front":"Term: Floating Nut Plate","back":"Definition: A design allowing slight lateral movement to accommodate minor misalignment during fastener insertion."},{"front":"A nut plate that does not permit lateral movement and requires precise drilling is known as a _____ nut plate.","back":"Fixed"},{"front":"What is the typical lateral movement range allowed by a floating nut plate?","back":"$\\pm 0.030\"$"},{"front":"Term: Dimpling","back":"Definition: A countersinking method for thin sheet metal that creates a conical recess to seat flush fasteners."},{"front":"Term: Rivet","back":"Definition: A permanent mechanical fastener used to secure a nut plate's flanges to the aircraft structure."},{"front":"What type of hole is created to allow a flush fastener head to sit level with or below a material's surface?","back":"Countersink"},{"front":"Term: Self-Locking Nut Plate","back":"Definition: A fastener featuring a nylon insert or distorted metal threads to resist loosening caused by vibration."},{"front":"In the context of nut plate specifications, what do the acronyms NAS and MS represent?","back":"National Aerospace Standard and Military Standard"},{"front":"Why is a nut plate preferred over a standard nut in sealed cavities or fuel tanks?","back":"It provides a captive threaded anchor in locations where back-wrench access is impossible."},{"front":"How does a nut plate facilitate faster aircraft maintenance compared to a standard nut?","back":"It enables fast, one-person panel removal by eliminating the need for a second technician to hold a back wrench."},{"front":"Approximately how many removal cycles is a nut plate designed to withstand over its service life?","back":"100+"},{"front":"Where would an aviation assembler typically use a Single-Lug (One-Ear) nut plate?","back":"In tight spaces where only one rivet location is available for attachment."},{"front":"What is the primary advantage of using a Double-Lug nut plate over a Single-Lug type?","back":"The dual rivets prevent the nut plate from rotating when the bolt is driven."},{"front":"Which specific nut plate type is designed for structural frames or ribs where the fastener enters at a 90-degree offset?","back":"Right-Angle Nut Plate"},{"front":"What is the temperature-related restriction for using a self-locking nut plate with a nylon insert?","back":"It cannot be used in high-heat zones such as engine nacelles or certain fuel tank areas."},{"front":"Which self-locking nut plate feature is approved for high-temperature applications?","back":"All-Metal (Prevailing Torque) distorted threads"},{"front":"According to the NAS/MS system, what specific type of nut plate is identified as MS21047?","back":"A fixed, double-lug, self-locking, all-metal nut plate."},{"front":"In the part number NAS1473-08, what information does the suffix '-08' provide?","back":"The thread size of the nut plate."},{"front":"What defines the primary function of a nut plate as a 'captive' anchor?","back":"It is permanently riveted to the structure, holding its position without external support during bolt installation."},{"front":"Term: FOD","back":"Definition: Foreign Object Debris; any material left inside an aircraft that could cause system damage or failure."},{"front":"How does the design of a nut plate contribute to safety via FOD prevention?","back":"The nut is permanently riveted and cannot be dropped into inaccessible areas like control cable bays."},{"front":"What is the typical design service life for commercial transport aircraft structures using nut plates?","back":"30 years"},{"front":"Why are nut plates used on avionics bays instead of threading directly into thin aluminum sheet?","back":"Nut plates provide a robust, replaceable element that prevents threads from stripping during frequent maintenance cycles."},{"front":"Which tool is essential for locating rivet holes in exact relation to the center bolt hole?","back":"Nut Plate Jig (Installation Jig)"},{"front":"What is the purpose of a microstop countersink cutter in nut plate installation?","back":"To create a precisely controlled countersink angle and depth for flush rivet installation."},{"front":"When back access is impossible for solid riveting, what tool is used to attach the nut plate flanges?","back":"Pull Rivet Tool (Cherry Rivet Gun)"},{"front":"Which tool is used to verify the shop head diameter and height of a rivet after installation?","back":"Rivet Gauge"},{"front":"What is the first procedural step in installing a nut plate?","back":"Drill the center bolt hole to the diameter specified on the engineering drawing."},{"front":"During the installation process, when should the holes be deburred?","back":"Holes must be deburred after drilling the center hole and again after drilling the rivet holes."},{"front":"What is the standard countersink angle used for most aircraft nut plate rivets?","back":"$100^\\circ$"},{"front":"How should an assembler verify that a rivet is seated correctly in a countersunk hole?","back":"The head should sit flush with the surface, checked using a straight edge or rivet head gauge."},{"front":"What is the final step in the nut plate installation process before sign-off?","back":"Perform a bolt test by threading a bolt by hand to confirm smooth engagement."},{"front":"Mistake: Using the wrong installation jig for a specific nut plate part number.","back":"Technical Fix: Stop work, verify the jig part number against the drawing, and re-drill only if authorized by engineering."},{"front":"Mistake: Over-countersinking a rivet hole.","back":"Technical Fix: Use a microstop to prevent further errors, test frequently, and seek an engineering disposition because material cannot be added back."},{"front":"Mistake: An oversized center bolt hole caused by a worn drill bit.","back":"Technical Fix: Stop drilling, measure the hole with a drill gauge, and report the discrepancy to a supervisor for potential repair."},{"front":"Mistake: Skipping the bolt test after riveting a nut plate.","back":"Technical Fix: Always perform a manual bolt test to confirm the threads were not cross-threaded or damaged during riveting."},{"front":"Mistake: Finding mixed nut plate part numbers in a hardware kit.","back":"Technical Fix: Stop and segregate the hardware, then verify every part number against the engineering drawing."},{"front":"What indicates that a nut plate's rivets have failed or were under-driven during the bolt test?","back":"The nut plate spins freely when attempting to thread the bolt."},{"front":"How must a spinning nut plate be corrected?","back":"It must be drilled out, the holes inspected, and a new nut plate installed and re-inspected."},{"front":"What happens if an assembler uses an oversized center hole for a nut plate?","back":"The bolt may miss the nut plate threads or allow the panel to shift under load."},{"front":"Why is it critical to never substitute a nut plate part number without engineering approval?","back":"It is an FAA compliance issue that can affect the airworthiness and safety of the aircraft."},{"front":"In a Wing Fuel Tank scenario, where are the floating nut plates typically located?","back":"Along the perimeter of the wing lower skin access panel."},{"front":"What tool is used alongside a rivet gun to form the shop head on a solid rivet?","back":"Bucking Bar"},{"front":"Term: NAS1473","back":"Definition: A specific family of nut plates characterized as floating and double-lug."},{"front":"How does a nut plate protect the 'parent structure' of an aircraft?","back":"By providing a robust and replaceable threaded element that prevents damage to the underlying material from repeated fastener cycles."},{"front":"A visually correct installation may still fail if the threads are damaged; this is why an assembler must perform a _____.","back":"Bolt Test"},{"front":"What is the primary risk of over-countersinking in thin aircraft skin?","back":"It creates a thin, weak area that is prone to cracking under structural load."},{"front":"What documentation must an assembler always reference to confirm the correct nut plate type and location?","back":"Engineering drawing or Aircraft Maintenance Manual (AMM)."}];
+var order = cards.map(function(_, i){ return i; });
+var current = 0;
+var cardBtn = document.getElementById("card-btn");
+var frontText = document.getElementById("front-text");
+var backText = document.getElementById("back-text");
+var idxFront = document.getElementById("idx-front");
+var idxBack = document.getElementById("idx-back");
+var progressEl = document.getElementById("progress");
+var prevBtn = document.getElementById("prev-btn");
+var nextBtn = document.getElementById("next-btn");
+var flipBtn = document.getElementById("flip-btn");
+var shuffleBtn = document.getElementById("shuffle-btn");
+var srStatus = document.getElementById("sr-status");
+function shuffleArray(arr){ var a = arr.slice(); for (var i = a.length - 1; i > 0; i--){ var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+function renderCard(announce){
+  var c = cards[order[current]];
+  frontText.textContent = c.front;
+  backText.textContent = c.back;
+  idxFront.textContent = String(current + 1).padStart(3, "0");
+  idxBack.textContent = String(current + 1).padStart(3, "0");
+  cardBtn.setAttribute("aria-pressed", "false");
+  cardBtn.setAttribute("aria-label", "Question: " + c.front + ". Activate to show the answer.");
+  progressEl.textContent = "Card " + (current + 1) + " of " + cards.length;
+  if (announce) srStatus.textContent = "Card " + (current + 1) + " of " + cards.length + ". Question: " + c.front;
+  prevBtn.disabled = cards.length <= 1;
+  nextBtn.disabled = cards.length <= 1;
+}
+function flipCard(){
+  var pressed = cardBtn.getAttribute("aria-pressed") === "true";
+  var c = cards[order[current]];
+  if (pressed){
+    cardBtn.setAttribute("aria-pressed", "false");
+    cardBtn.setAttribute("aria-label", "Question: " + c.front + ". Activate to show the answer.");
+    srStatus.textContent = "Showing question: " + c.front;
+  } else {
+    cardBtn.setAttribute("aria-pressed", "true");
+    cardBtn.setAttribute("aria-label", "Verified answer: " + c.back + ". Activate to show the question.");
+    srStatus.textContent = "Showing verified answer: " + c.back;
+  }
+}
+function goTo(delta){
+  if (cards.length < 2) return;
+  current = (current + delta + cards.length) % cards.length;
+  renderCard(true);
+}
+cardBtn.addEventListener("click", flipCard);
+flipBtn.addEventListener("click", function(){ cardBtn.focus(); flipCard(); });
+prevBtn.addEventListener("click", function(){ goTo(-1); });
+nextBtn.addEventListener("click", function(){ goTo(1); });
+shuffleBtn.addEventListener("click", function(){ order = shuffleArray(order); current = 0; renderCard(false); srStatus.textContent = "Deck shuffled. Card 1 of " + cards.length; });
+document.addEventListener("keydown", function(e){
+  if (e.key === "ArrowLeft"){ e.preventDefault(); goTo(-1); }
+  else if (e.key === "ArrowRight"){ e.preventDefault(); goTo(1); }
+});
+if (cards.length){ renderCard(true); } else { progressEl.textContent = "No cards found."; }
+})();
+</script>
+</body>
+</html>
