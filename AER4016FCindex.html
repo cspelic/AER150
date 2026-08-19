@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AER4016flashcards — Flashcards</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#F3F0E7;--paper-alt:#ECE6D6;--card:#FFFFFF;--ink:#23201A;--ink-soft:#5B564A;--accent:#145A4A;--accent-dark:#0E463A;--accent-tab:#8B3A2F;--rule:#D9D2C1;--focus:#0E463A;--radius:10px;font-size:16px;}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{background:var(--paper);color:var(--ink);font-family:'Public Sans',system-ui,sans-serif;line-height:1.5;min-height:100vh;}
+h1{font-family:'Public Sans',system-ui,sans-serif;font-weight:800;letter-spacing:-.01em;margin:0 0 .3em;}
+.mono{font-family:'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.02em;}
+.skip-link{position:absolute;left:-999px;top:0;background:var(--accent-dark);color:#fff;padding:.75em 1.25em;z-index:100;border-radius:0 0 8px 0;font-weight:600;}
+.skip-link:focus{left:0;}
+:focus-visible{outline:3px solid var(--focus);outline-offset:3px;}
+header.top{border-bottom:2px solid var(--ink);padding:1.75rem 1.5rem 1.25rem;max-width:700px;margin:0 auto;}
+header.top .eyebrow{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:.8rem;letter-spacing:.12em;text-transform:uppercase;color:var(--accent-dark);background:var(--paper-alt);border:1px solid var(--rule);padding:.2em .6em;border-radius:4px;margin-bottom:.6rem;}
+main{max-width:700px;margin:0 auto;padding:1.5rem;}
+.deck-meta{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.6rem;margin-bottom:1rem;}
+.stage{perspective:1400px;max-width:560px;margin:0 auto 1.25rem;}
+.card-face{position:relative;width:100%;min-height:260px;border-radius:var(--radius);background:transparent;border:none;padding:0;cursor:pointer;display:block;}
+.card-inner{display:block;position:relative;width:100%;height:100%;min-height:260px;transition:transform .5s cubic-bezier(.4,.2,.2,1);transform-style:preserve-3d;}
+.card-face[aria-pressed="true"] .card-inner{transform:rotateY(180deg);}
+.face{position:absolute;inset:0;background:var(--card);border:1.5px solid var(--rule);border-radius:var(--radius);box-shadow:0 2px 0 var(--rule),0 10px 24px -12px rgba(35,32,26,.35);padding:2rem 1.75rem;display:flex;flex-direction:column;backface-visibility:hidden;-webkit-backface-visibility:hidden;}
+.face::before{content:"";position:absolute;left:1.75rem;right:1.75rem;top:3.2rem;height:2px;background:repeating-linear-gradient(to right,var(--rule) 0 10px,transparent 10px 16px);}
+.face .tag{font-family:'IBM Plex Mono',monospace;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:#fff;background:var(--accent-tab);padding:.25em .6em;border-radius:3px 3px 3px 0;}
+.face-badges{display:flex;align-items:center;gap:.5rem;align-self:flex-start;margin-bottom:1.4rem;}
+.verified-stamp-wrap{position:absolute;right:1.1rem;bottom:1.1rem;transform:rotate(-9deg);pointer-events:none;}
+.verified-stamp-ring{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.2rem;width:76px;height:76px;border-radius:50%;border:2px solid var(--accent);box-shadow:inset 0 0 0 3px var(--paper),inset 0 0 0 5px var(--accent);color:var(--accent);opacity:.88;}
+.verified-stamp-ring svg{flex:none;}
+.verified-stamp-text{font-family:'Public Sans',sans-serif;font-weight:800;font-size:.5rem;line-height:1.2;letter-spacing:.06em;text-align:center;text-transform:uppercase;}
+.face.back .tag{background:var(--accent-dark);}
+.face .content{font-family:'Public Sans',system-ui,sans-serif;font-weight:500;font-size:1.3rem;line-height:1.45;flex:1;display:flex;align-items:center;overflow-wrap:anywhere;}
+.face .idx{position:absolute;top:.9rem;right:1rem;font-family:'IBM Plex Mono',monospace;font-size:.75rem;color:var(--ink-soft);}
+.face.back{transform:rotateY(180deg);}
+.controls{display:flex;justify-content:center;align-items:center;gap:.6rem;flex-wrap:wrap;}
+.btn{font-family:'Public Sans',sans-serif;font-weight:600;font-size:.95rem;border-radius:8px;border:1.5px solid var(--accent-dark);background:var(--accent);color:#fff;padding:.7em 1.3em;min-height:44px;cursor:pointer;}
+.btn:hover{background:var(--accent-dark);}
+.btn.secondary{background:var(--card);color:var(--accent-dark);}
+.btn.secondary:hover{background:var(--paper-alt);}
+.btn:disabled{opacity:.5;cursor:not-allowed;}
+.hint{color:var(--ink-soft);font-size:.9rem;text-align:center;}
+#sr-status{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;}
+@media (prefers-reduced-motion: reduce){.card-inner{transition:none;}}
+@media (max-width:500px){.face .content{font-size:1.2rem;}}
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to main content</a>
+<header class="top">
+<span class="eyebrow">Catalog Drawer</span>
+<h1>AER4016flashcards</h1>
+</header>
+<main id="main">
+<div class="deck-meta"><span class="mono" id="progress"></span></div>
+<div class="stage">
+<button type="button" class="card-face" id="card-btn" aria-pressed="false">
+<span class="card-inner" id="card-inner">
+<span class="face front"><span class="idx mono" id="idx-front"></span><span class="face-badges"><span class="tag">Question</span></span><span class="content" id="front-text"></span></span>
+<span class="face back" aria-hidden="true"><span class="idx mono" id="idx-back"></span><span class="face-badges"><span class="tag">Answer</span></span><span class="content" id="back-text"></span><span class="verified-stamp-wrap" aria-hidden="true"><span class="verified-stamp-ring"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="verified-stamp-text">Verified<br>Correct</span></span></span></span>
+</span>
+</button>
+</div>
+<div class="controls">
+<button type="button" class="btn secondary" id="prev-btn">← Previous</button>
+<button type="button" class="btn" id="flip-btn">Flip card</button>
+<button type="button" class="btn secondary" id="next-btn">Next →</button>
+<button type="button" class="btn secondary" id="shuffle-btn">Shuffle</button>
+</div>
+<p class="hint">Press <kbd>Space</kbd> or <kbd>Enter</kbd> on the focused card to flip it, and use the ←/→ arrow keys to move between cards.</p>
+<div id="sr-status" aria-live="polite"></div>
+</main>
+<script>
+(function(){
+"use strict";
+var cards = [{"front":"What is the primary function of a flush rivet in aircraft manufacturing?","back":"To create a smooth, aerodynamically sound surface that meets aviation standards."},{"front":"Term: Flush Rivet","back":"Definition: A rivet with a countersunk head designed to sit level with or below the skin surface."},{"front":"Term: Manufactured Head","back":"Definition: The pre-formed head of the rivet as it comes from the manufacturer."},{"front":"Term: Clinch (Shop Head)","back":"Definition: The deformed end of the rivet on the blind side formed during the driving process."},{"front":"Concept: Countersink","back":"A cone-shaped recess machined into material to receive the angled head of a flush rivet."},{"front":"Federal gauge","back":"A tool used to measure exactly how high or low the manufactured rivet head sits relative to the skin."},{"front":"Spoon gauge","back":"A tool used to measure the diameter and thickness of the driven (shop) head."},{"front":"What does the term 'clinch diameter' refer to?","back":"The width of the driven head after the riveting process is complete."},{"front":"What does the term 'clinch thickness' refer to?","back":"The height of the driven head measured from the surface of the material."},{"front":"Concept: Tolerance","back":"The allowable range of variation for a measurement in aviation manufacturing."},{"front":"Surface condition: Rivet head protruding above the skin surface","back":"It creates turbulence and drag, which increases fuel burn and reduces aircraft performance."},{"front":"Surface condition: Incorrectly installed or damaged rivet joint","back":"It may fail to carry the designed load, potentially leading to structural failure under flight loads."},{"front":"What regulatory document specifies acceptable rivet appearance and standards?","back":"FAA-approved data such as the aircraft's Structural Repair Manual (SRM)."},{"front":"Which rivet designation represents a $100^{\\circ}$ countersunk head rivet used on aircraft skins?","back":"AN426 / MS20426"},{"front":"What is the purpose of the AN507 fastener?","back":"An $82^{\\circ}$ countersunk head screw-type fastener used where removal may be required."},{"front":"Why must the countersink angle match the rivet head angle exactly?","back":"Mismatched angles produce poor seating and unacceptable head conditions."},{"front":"Fastener alloy code -AD","back":"2117-T4 aluminum alloy."},{"front":"What must a technician verify before installing any flush rivet?","back":"That the correct alloy is specified on the engineering drawing."},{"front":"The sequence of flush riveting is Drill and Countersink, _____, Drive Rivet, and Inspect Heads.","back":"Insert Rivet"},{"front":"What is the 'knife-edge' condition in countersinking?","back":"A rejection criterion where the countersink is so deep that only a razor-thin edge of material remains."},{"front":"Defect name: Proud / High","back":"When the manufactured head sticks up above the aircraft skin surface."},{"front":"Surface condition: Countersink is too shallow","back":"The rivet head will sit proud (high), disrupting aerodynamics and failing visual inspection."},{"front":"Surface condition: Countersink is at the correct depth","back":"Airflow is undisturbed and the joint is structurally sound."},{"front":"What action should a technician take if they discover a bad countersink?","back":"Stop work and consult a supervisor or inspector before proceeding."},{"front":"What tool is held firmly against the shank on the blind side during riveting?","back":"Bucking bar"},{"front":"During driving, a slipped rivet gun set causes a defect known as a _____.","back":"smiley"},{"front":"Smiley","back":"A crescent-shaped gouge in the skin caused by the rivet gun set slipping."},{"front":"How should gun pressure be adjusted for different rivet sizes?","back":"Technicians must use the chart in the shop manual to set the correct air pressure."},{"front":"What is the result of using too much air pressure when driving a rivet?","back":"It smashes the rivet and damages the surrounding skin."},{"front":"What is the result of using too little air pressure when driving a rivet?","back":"It leaves an under-driven shop head."},{"front":"How can the driver and bucker prevent accidents and ensure coordination?","back":"By using a simple tap signal system."},{"front":"What is the first tool a technician should use when inspecting a manufactured head?","back":"Visual judgment (the eyes)."},{"front":"Which visual condition involves a head sitting level with material and having no cracks?","back":"Acceptable condition"},{"front":"Low head","back":"A rivet head recessed too far below the skin surface."},{"front":"Cocked rivet","back":"A rivet head that is not centered and is tilted in the countersink."},{"front":"Skin damage","back":"Dents or deformation occurring in the material surrounding the rivet."},{"front":"Surface crack","back":"A crack radiating outward from the edge of the rivet head."},{"front":"How many thousandths of an inch does one unit on a Federal gauge typically represent?","back":"One thousandth ($0.001$ inch)."},{"front":"What is the first step when using a Federal gauge for inspection?","back":"Zero the gauge on a flat, undamaged portion of the skin near the rivet."},{"front":"On a Federal gauge, what does a positive reading indicate?","back":"The rivet head is proud (sitting above the skin)."},{"front":"On a Federal gauge, what does a negative reading indicate?","back":"The rivet head is sitting below the skin surface."},{"front":"What is the typical acceptable tolerance range for a flush rivet head depth?","back":"$0.000$ inch to $-0.005$ inch (at or below flush)."},{"front":"A Federal gauge reading of $-0.005$ inch or more is typically _____.","back":"rejected"},{"front":"Why should a technician take multiple readings with a Federal gauge?","back":"Rivet heads can be slightly tilted, requiring verification of the entire surface."},{"front":"What must a technician do if a Federal gauge reading is $+0.003$ inch?","back":"Remove and replace the rivet because it is proud."},{"front":"What is the minimum required clinch diameter for a driven rivet?","back":"$1.5 \\times$ the original shank diameter."},{"front":"For a rivet with a $1/8$ inch shank, what is the minimum acceptable shop head width?","back":"$3/16$ inch."},{"front":"What is the minimum required clinch thickness for a driven rivet?","back":"$0.5 \\times$ (half) the original shank diameter."},{"front":"For a rivet with a $1/8$ inch shank, what is the minimum acceptable shop head height?","back":"$1/16$ inch."},{"front":"In aerospace assemblies, how many driven rivets must be inspected for shop head quality?","back":"$100\\%$ of all driven rivets."},{"front":"When using a spoon gauge diameter slot, what indicates a failure?","back":"The slot slides over the shop head, meaning it is too small."},{"front":"When using a spoon gauge diameter slot, what indicates a pass?","back":"The slot cannot fit over the shop head."},{"front":"A shop head that is too flat and fails the spoon gauge height check is _____.","back":"under-driven"},{"front":"What should be done with a rivet that fails either the diameter or thickness check?","back":"It must be drilled out and replaced."},{"front":"What size drill bit should be used to remove a rejected rivet?","back":"A bit the same size as the original shank diameter."},{"front":"Why is it important to center punch the manufactured head before drilling out a rivet?","back":"To prevent the drill bit from walking and damaging the hole or skin."},{"front":"How deep should a technician drill when removing a rejected rivet?","back":"Just deep enough to free the manufactured head (head depth only)."},{"front":"What tool is used to drive the remaining shank through after the rivet head is removed?","back":"Pin punch"},{"front":"AC 43.13-1B","back":"The FAA Advisory Circular covering acceptable methods for aircraft maintenance and repair."},{"front":"Which document specifies the exact tolerances, rivet types, and spacing for every aircraft joint?","back":"Engineering drawings or the Structural Repair Manual (SRM)."},{"front":"What quality management standard do aerospace manufacturers operate under?","back":"AS9100"},{"front":"A visually acceptable rivet head must still be gauged if you are not certain it is within _____.","back":"tolerance"},{"front":"What is the consequence of drilling a hole oversize during rivet removal?","back":"It may require a larger rivet or make the hole unusable."},{"front":"Under what condition must a 'smiley' be evaluated by a QC inspector?","back":"Every time it occurs, even if all other measurements pass."},{"front":"What does signing off on a rivet installation certify?","back":"That the work was performed to approved data and meets all standards."}];
+var order = cards.map(function(_, i){ return i; });
+var current = 0;
+var cardBtn = document.getElementById("card-btn");
+var frontText = document.getElementById("front-text");
+var backText = document.getElementById("back-text");
+var idxFront = document.getElementById("idx-front");
+var idxBack = document.getElementById("idx-back");
+var progressEl = document.getElementById("progress");
+var prevBtn = document.getElementById("prev-btn");
+var nextBtn = document.getElementById("next-btn");
+var flipBtn = document.getElementById("flip-btn");
+var shuffleBtn = document.getElementById("shuffle-btn");
+var srStatus = document.getElementById("sr-status");
+function shuffleArray(arr){ var a = arr.slice(); for (var i = a.length - 1; i > 0; i--){ var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+function renderCard(announce){
+  var c = cards[order[current]];
+  frontText.textContent = c.front;
+  backText.textContent = c.back;
+  idxFront.textContent = String(current + 1).padStart(3, "0");
+  idxBack.textContent = String(current + 1).padStart(3, "0");
+  cardBtn.setAttribute("aria-pressed", "false");
+  cardBtn.setAttribute("aria-label", "Question: " + c.front + ". Activate to show the answer.");
+  progressEl.textContent = "Card " + (current + 1) + " of " + cards.length;
+  if (announce) srStatus.textContent = "Card " + (current + 1) + " of " + cards.length + ". Question: " + c.front;
+  prevBtn.disabled = cards.length <= 1;
+  nextBtn.disabled = cards.length <= 1;
+}
+function flipCard(){
+  var pressed = cardBtn.getAttribute("aria-pressed") === "true";
+  var c = cards[order[current]];
+  if (pressed){
+    cardBtn.setAttribute("aria-pressed", "false");
+    cardBtn.setAttribute("aria-label", "Question: " + c.front + ". Activate to show the answer.");
+    srStatus.textContent = "Showing question: " + c.front;
+  } else {
+    cardBtn.setAttribute("aria-pressed", "true");
+    cardBtn.setAttribute("aria-label", "Verified answer: " + c.back + ". Activate to show the question.");
+    srStatus.textContent = "Showing verified answer: " + c.back;
+  }
+}
+function goTo(delta){
+  if (cards.length < 2) return;
+  current = (current + delta + cards.length) % cards.length;
+  renderCard(true);
+}
+cardBtn.addEventListener("click", flipCard);
+flipBtn.addEventListener("click", function(){ cardBtn.focus(); flipCard(); });
+prevBtn.addEventListener("click", function(){ goTo(-1); });
+nextBtn.addEventListener("click", function(){ goTo(1); });
+shuffleBtn.addEventListener("click", function(){ order = shuffleArray(order); current = 0; renderCard(false); srStatus.textContent = "Deck shuffled. Card 1 of " + cards.length; });
+document.addEventListener("keydown", function(e){
+  if (e.key === "ArrowLeft"){ e.preventDefault(); goTo(-1); }
+  else if (e.key === "ArrowRight"){ e.preventDefault(); goTo(1); }
+});
+if (cards.length){ renderCard(true); } else { progressEl.textContent = "No cards found."; }
+})();
+</script>
+</body>
+</html>
