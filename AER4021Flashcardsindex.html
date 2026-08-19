@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AER4021flashcards — Flashcards</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#F3F0E7;--paper-alt:#ECE6D6;--card:#FFFFFF;--ink:#23201A;--ink-soft:#5B564A;--accent:#145A4A;--accent-dark:#0E463A;--accent-tab:#8B3A2F;--rule:#D9D2C1;--focus:#0E463A;--radius:10px;font-size:16px;}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{background:var(--paper);color:var(--ink);font-family:'Public Sans',system-ui,sans-serif;line-height:1.5;min-height:100vh;}
+h1{font-family:'Public Sans',system-ui,sans-serif;font-weight:800;letter-spacing:-.01em;margin:0 0 .3em;}
+.mono{font-family:'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.02em;}
+.skip-link{position:absolute;left:-999px;top:0;background:var(--accent-dark);color:#fff;padding:.75em 1.25em;z-index:100;border-radius:0 0 8px 0;font-weight:600;}
+.skip-link:focus{left:0;}
+:focus-visible{outline:3px solid var(--focus);outline-offset:3px;}
+header.top{border-bottom:2px solid var(--ink);padding:1.75rem 1.5rem 1.25rem;max-width:700px;margin:0 auto;}
+header.top .eyebrow{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:.8rem;letter-spacing:.12em;text-transform:uppercase;color:var(--accent-dark);background:var(--paper-alt);border:1px solid var(--rule);padding:.2em .6em;border-radius:4px;margin-bottom:.6rem;}
+main{max-width:700px;margin:0 auto;padding:1.5rem;}
+.deck-meta{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.6rem;margin-bottom:1rem;}
+.stage{perspective:1400px;max-width:560px;margin:0 auto 1.25rem;}
+.card-face{position:relative;width:100%;min-height:260px;border-radius:var(--radius);background:transparent;border:none;padding:0;cursor:pointer;display:block;}
+.card-inner{display:block;position:relative;width:100%;height:100%;min-height:260px;transition:transform .5s cubic-bezier(.4,.2,.2,1);transform-style:preserve-3d;}
+.card-face[aria-pressed="true"] .card-inner{transform:rotateY(180deg);}
+.face{position:absolute;inset:0;background:var(--card);border:1.5px solid var(--rule);border-radius:var(--radius);box-shadow:0 2px 0 var(--rule),0 10px 24px -12px rgba(35,32,26,.35);padding:2rem 1.75rem;display:flex;flex-direction:column;backface-visibility:hidden;-webkit-backface-visibility:hidden;}
+.face::before{content:"";position:absolute;left:1.75rem;right:1.75rem;top:3.2rem;height:2px;background:repeating-linear-gradient(to right,var(--rule) 0 10px,transparent 10px 16px);}
+.face .tag{font-family:'IBM Plex Mono',monospace;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:#fff;background:var(--accent-tab);padding:.25em .6em;border-radius:3px 3px 3px 0;}
+.face-badges{display:flex;align-items:center;gap:.5rem;align-self:flex-start;margin-bottom:1.4rem;}
+.verified-stamp-wrap{position:absolute;right:1.1rem;bottom:1.1rem;transform:rotate(-9deg);pointer-events:none;}
+.verified-stamp-ring{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.2rem;width:76px;height:76px;border-radius:50%;border:2px solid var(--accent);box-shadow:inset 0 0 0 3px var(--paper),inset 0 0 0 5px var(--accent);color:var(--accent);opacity:.88;}
+.verified-stamp-ring svg{flex:none;}
+.verified-stamp-text{font-family:'Public Sans',sans-serif;font-weight:800;font-size:.5rem;line-height:1.2;letter-spacing:.06em;text-align:center;text-transform:uppercase;}
+.face.back .tag{background:var(--accent-dark);}
+.face .content{font-family:'Public Sans',system-ui,sans-serif;font-weight:500;font-size:1.3rem;line-height:1.45;flex:1;display:flex;align-items:center;overflow-wrap:anywhere;}
+.face .idx{position:absolute;top:.9rem;right:1rem;font-family:'IBM Plex Mono',monospace;font-size:.75rem;color:var(--ink-soft);}
+.face.back{transform:rotateY(180deg);}
+.controls{display:flex;justify-content:center;align-items:center;gap:.6rem;flex-wrap:wrap;}
+.btn{font-family:'Public Sans',sans-serif;font-weight:600;font-size:.95rem;border-radius:8px;border:1.5px solid var(--accent-dark);background:var(--accent);color:#fff;padding:.7em 1.3em;min-height:44px;cursor:pointer;}
+.btn:hover{background:var(--accent-dark);}
+.btn.secondary{background:var(--card);color:var(--accent-dark);}
+.btn.secondary:hover{background:var(--paper-alt);}
+.btn:disabled{opacity:.5;cursor:not-allowed;}
+.hint{color:var(--ink-soft);font-size:.9rem;text-align:center;}
+#sr-status{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;}
+@media (prefers-reduced-motion: reduce){.card-inner{transition:none;}}
+@media (max-width:500px){.face .content{font-size:1.2rem;}}
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to main content</a>
+<header class="top">
+<span class="eyebrow">Catalog Drawer</span>
+<h1>AER4021flashcards</h1>
+</header>
+<main id="main">
+<div class="deck-meta"><span class="mono" id="progress"></span></div>
+<div class="stage">
+<button type="button" class="card-face" id="card-btn" aria-pressed="false">
+<span class="card-inner" id="card-inner">
+<span class="face front"><span class="idx mono" id="idx-front"></span><span class="face-badges"><span class="tag">Question</span></span><span class="content" id="front-text"></span></span>
+<span class="face back" aria-hidden="true"><span class="idx mono" id="idx-back"></span><span class="face-badges"><span class="tag">Answer</span></span><span class="content" id="back-text"></span><span class="verified-stamp-wrap" aria-hidden="true"><span class="verified-stamp-ring"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="verified-stamp-text">Verified<br>Correct</span></span></span></span>
+</span>
+</button>
+</div>
+<div class="controls">
+<button type="button" class="btn secondary" id="prev-btn">← Previous</button>
+<button type="button" class="btn" id="flip-btn">Flip card</button>
+<button type="button" class="btn secondary" id="next-btn">Next →</button>
+<button type="button" class="btn secondary" id="shuffle-btn">Shuffle</button>
+</div>
+<p class="hint">Press <kbd>Space</kbd> or <kbd>Enter</kbd> on the focused card to flip it, and use the ←/→ arrow keys to move between cards.</p>
+<div id="sr-status" aria-live="polite"></div>
+</main>
+<script>
+(function(){
+"use strict";
+var cards = [{"front":"Why does rivet removal require a controlled destruction strategy compared to installation?","back":"The shank has been permanently deformed and the head is flush against the skin."},{"front":"What is the primary goal of the rivet removal process?","back":"The fastener must be removed without enlarging or damaging the surrounding hole."},{"front":"Term: Manufactured Head","back":"The pre-formed factory head of the rivet that is visible and drilled during removal."},{"front":"Term: Shop Head (Bucktail)","back":"The deformed end of the rivet shank created by a bucking bar during installation."},{"front":"Term: Shank","back":"The cylindrical body of the rivet that passes through the structural hole."},{"front":"Tool: Pin Punch","back":"A straight, blunt-tipped tool used to drive the shank out after the head is removed."},{"front":"Tool: Drill Motor","back":"A pneumatic or electric tool used to spin the bit during controlled head removal."},{"front":"Tool: Center Punch","back":"A pointed tool used to create a small divot to keep the drill bit on-center."},{"front":"What is the first step of the integrated rivet removal workflow?","back":"Mark Center."},{"front":"What is the second step of the integrated rivet removal workflow?","back":"Drill Head."},{"front":"What is the third step of the integrated rivet removal workflow?","back":"Drive Shank."},{"front":"What is the final step of the integrated rivet removal workflow?","back":"Inspect Hole."},{"front":"Step: Mark Center","back":"Create a small divot at the visual center of the rivet head using a drill bit or center punch."},{"front":"Step: Drill Head","back":"Apply low RPM to sever the manufactured head from the shank at their junction."},{"front":"Step: Drive Shank","back":"Use a pin punch and ball peen hammer to push the remaining body through the hole."},{"front":"Step: Inspect Hole","back":"Check the resulting hole for elongation, scoring, or delamination before installing a replacement."},{"front":"What is the general rule for selecting a drill bit size for rivet head removal?","back":"Choose a drill bit one size smaller than the rivet shank diameter."},{"front":"Which numbered drill bit is used to remove a $3/32\"$ (AD3) rivet?","back":"#40."},{"front":"Which numbered drill bit is used to remove a $1/8\"$ (AD4) rivet?","back":"#30."},{"front":"Which numbered drill bit is used to remove a $5/32\"$ (AD5) rivet?","back":"#20."},{"front":"Which numbered drill bit is used to remove a $3/16\"$ (AD6) rivet?","back":"#10."},{"front":"Why must the drill bit be smaller than the rivet shank diameter?","back":"The bit must remove only the head without contacting the structural hole walls."},{"front":"What risk is associated with using a drill bit that is too large?","back":"The hole wall will be damaged, requiring a larger rivet or structural repair."},{"front":"What happens if the chosen drill bit for removal is too small?","back":"The manufactured head will not release cleanly from the shank."},{"front":"What is the recommended RPM range for most aluminum rivet removal work?","back":"$300-500$ RPM."},{"front":"Why is high RPM considered a mistake when drilling rivet heads?","back":"It causes heat buildup and reduces control over the drilling depth."},{"front":"What is the purpose of maintaining a perpendicular 'steady feed' during drilling?","back":"It prevents the creation of unacceptable oval holes."},{"front":"What sensation indicates the manufactured head has been successfully severed?","back":"The drill bit will feel like it 'drops' slightly as it clears the junction."},{"front":"What visual cue indicates the drill is still removing material from the rivet head?","back":"A ring of aluminum curls or chips will form around the drill bit."},{"front":"What grinding sensation indicates a mistake during the 'Drill Head' step?","back":"The technician has drilled too deep into the shank or the surrounding structure."},{"front":"Tool: Drill Stop Collar","back":"A small collar clamped to the bit to physically prevent drilling deeper than the preset head height."},{"front":"Why should technicians use a drill stop in a production environment?","back":"It ensures consistent drilling depth and protects the aluminum skin from contact."},{"front":"How should the drill stop be set for rivet removal?","back":"Measure the height of the rivet head and set the collar to that exact depth."},{"front":"Why is hearing protection required when using pneumatic drill motors?","back":"Pneumatic motors produce sustained noise levels above safe thresholds."},{"front":"When should work gloves be worn during the rivet removal process?","back":"They protect against sharp rivet edges and metal chips when handling removed hardware."},{"front":"What is the sizing rule for selecting a pin punch?","back":"The tip must be slightly smaller than the hole diameter to avoid binding or scoring."},{"front":"According to 'Shop Wisdom,' how should you get a stubborn shank moving?","back":"Use a tapered starter punch first, then switch to a pin punch for the final drive-out."},{"front":"Why is a ball peen hammer preferred over a claw hammer for rivet removal?","back":"It is specifically designed for metal punching work and controlled strikes."},{"front":"What hammer technique provides maximum control and power with minimal effort?","back":"Grip the hammer handle near the end."},{"front":"What is the consequence of striking a punch with a glancing blow?","back":"Glancing blows bend punches and can cause the strike to miss the mark."},{"front":"Why must the technician watch the surrounding structure while using a hammer?","back":"To avoid bruising or denting the aluminum skin around the hole."},{"front":"What does an egg-shaped or oval hole indicate after removal?","back":"The drill bit wandered off-center during the 'Drill Head' step."},{"front":"What do vertical scratch marks inside a hole wall indicate?","back":"The punch was cocked at an angle during the 'Drive Shank' step."},{"front":"In composite-to-metal assemblies, what is 'delamination'?","back":"Skin lifting or layer separation around the hole edge caused by improper removal."},{"front":"What tools are used to measure the hole diameter after removing a rivet?","back":"A pin gauge, go/no-go gauge, or the correct size drill bit."},{"front":"What is the required standard for hole roundness after a clean removal?","back":"The hole must be perfectly round."},{"front":"What is the acceptable tolerance for hole diameter after rivet removal?","back":"Original diameter $\\pm 0.001\"$."},{"front":"What is the risk of an off-center mark during step one?","back":"It leads to off-center drilling, hole damage, and a failed punch-out."},{"front":"What does a formal Nonconformance Report (NCR) indicate in quality control?","back":"A document triggered by hole damage that follows the part through the repair process."},{"front":"FAA Document: AC 43.13-1B","back":"The Advisory Circular covering acceptable methods for standard aircraft maintenance and repair."},{"front":"What is a Structural Repair Manual (SRM)?","back":"An aircraft-specific document from the manufacturer providing approved repair data."},{"front":"Why must every rivet removal on a certificated aircraft be documented with a work order?","back":"To ensure traceability and sign-off by an authorized technician."},{"front":"What should a technician check for when inspecting drill bits before use?","back":"Dull edges, chips, or cracks that might increase the risk of walking."},{"front":"What is 'mushrooming' on a pin punch?","back":"The spreading of the punch head caused by repeated hammer blows."},{"front":"Why is a loose hammer head considered a serious hazard?","back":"The head can become a high-speed projectile during use."},{"front":"If a hole becomes oversized during removal, what is the typical requirement?","back":"Installation of the next larger rivet size or a structural repair."},{"front":"What is the first move a professional technician should make before starting a rework order?","back":"Review the SRM and select the correct bit size and tools."},{"front":"In an MRO environment, what are C-checks and D-checks?","back":"Scheduled heavy maintenance events involving extensive rivet removal and skin replacement."},{"front":"What external events might necessitate rivet removal for damage repair?","back":"Lightning strikes, bird strikes, or structural corrosion."},{"front":"The process of modifying aircraft structure for new avionics is often governed by a _____.","back":"Supplemental Type Certificate (STC)"},{"front":"What should you do if you notice a hole is slightly oval after removing a rivet?","back":"Stop work, document the condition, and notify a supervisor or inspector."},{"front":"How does a clean rivet removal directly affect the safety of the aircraft?","back":"It maintains the structural integrity and airworthiness of the airframe."}];
+var order = cards.map(function(_, i){ return i; });
+var current = 0;
+var cardBtn = document.getElementById("card-btn");
+var frontText = document.getElementById("front-text");
+var backText = document.getElementById("back-text");
+var idxFront = document.getElementById("idx-front");
+var idxBack = document.getElementById("idx-back");
+var progressEl = document.getElementById("progress");
+var prevBtn = document.getElementById("prev-btn");
+var nextBtn = document.getElementById("next-btn");
+var flipBtn = document.getElementById("flip-btn");
+var shuffleBtn = document.getElementById("shuffle-btn");
+var srStatus = document.getElementById("sr-status");
+function shuffleArray(arr){ var a = arr.slice(); for (var i = a.length - 1; i > 0; i--){ var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+function renderCard(announce){
+  var c = cards[order[current]];
+  frontText.textContent = c.front;
+  backText.textContent = c.back;
+  idxFront.textContent = String(current + 1).padStart(3, "0");
+  idxBack.textContent = String(current + 1).padStart(3, "0");
+  cardBtn.setAttribute("aria-pressed", "false");
+  cardBtn.setAttribute("aria-label", "Question: " + c.front + ". Activate to show the answer.");
+  progressEl.textContent = "Card " + (current + 1) + " of " + cards.length;
+  if (announce) srStatus.textContent = "Card " + (current + 1) + " of " + cards.length + ". Question: " + c.front;
+  prevBtn.disabled = cards.length <= 1;
+  nextBtn.disabled = cards.length <= 1;
+}
+function flipCard(){
+  var pressed = cardBtn.getAttribute("aria-pressed") === "true";
+  var c = cards[order[current]];
+  if (pressed){
+    cardBtn.setAttribute("aria-pressed", "false");
+    cardBtn.setAttribute("aria-label", "Question: " + c.front + ". Activate to show the answer.");
+    srStatus.textContent = "Showing question: " + c.front;
+  } else {
+    cardBtn.setAttribute("aria-pressed", "true");
+    cardBtn.setAttribute("aria-label", "Verified answer: " + c.back + ". Activate to show the question.");
+    srStatus.textContent = "Showing verified answer: " + c.back;
+  }
+}
+function goTo(delta){
+  if (cards.length < 2) return;
+  current = (current + delta + cards.length) % cards.length;
+  renderCard(true);
+}
+cardBtn.addEventListener("click", flipCard);
+flipBtn.addEventListener("click", function(){ cardBtn.focus(); flipCard(); });
+prevBtn.addEventListener("click", function(){ goTo(-1); });
+nextBtn.addEventListener("click", function(){ goTo(1); });
+shuffleBtn.addEventListener("click", function(){ order = shuffleArray(order); current = 0; renderCard(false); srStatus.textContent = "Deck shuffled. Card 1 of " + cards.length; });
+document.addEventListener("keydown", function(e){
+  if (e.key === "ArrowLeft"){ e.preventDefault(); goTo(-1); }
+  else if (e.key === "ArrowRight"){ e.preventDefault(); goTo(1); }
+});
+if (cards.length){ renderCard(true); } else { progressEl.textContent = "No cards found."; }
+})();
+</script>
+</body>
+</html>
