@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>4011flashcards — Flashcards</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#F3F0E7;--paper-alt:#ECE6D6;--card:#FFFFFF;--ink:#23201A;--ink-soft:#5B564A;--accent:#145A4A;--accent-dark:#0E463A;--accent-tab:#8B3A2F;--rule:#D9D2C1;--focus:#0E463A;--radius:10px;font-size:16px;}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{background:var(--paper);color:var(--ink);font-family:'Public Sans',system-ui,sans-serif;line-height:1.5;min-height:100vh;}
+h1{font-family:'Public Sans',system-ui,sans-serif;font-weight:800;letter-spacing:-.01em;margin:0 0 .3em;}
+.mono{font-family:'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.02em;}
+.skip-link{position:absolute;left:-999px;top:0;background:var(--accent-dark);color:#fff;padding:.75em 1.25em;z-index:100;border-radius:0 0 8px 0;font-weight:600;}
+.skip-link:focus{left:0;}
+:focus-visible{outline:3px solid var(--focus);outline-offset:3px;}
+header.top{border-bottom:2px solid var(--ink);padding:1.75rem 1.5rem 1.25rem;max-width:700px;margin:0 auto;}
+header.top .eyebrow{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:.8rem;letter-spacing:.12em;text-transform:uppercase;color:var(--accent-dark);background:var(--paper-alt);border:1px solid var(--rule);padding:.2em .6em;border-radius:4px;margin-bottom:.6rem;}
+main{max-width:700px;margin:0 auto;padding:1.5rem;}
+.deck-meta{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.6rem;margin-bottom:1rem;}
+.stage{perspective:1400px;max-width:560px;margin:0 auto 1.25rem;}
+.card-face{position:relative;width:100%;min-height:260px;border-radius:var(--radius);background:transparent;border:none;padding:0;cursor:pointer;display:block;}
+.card-inner{display:block;position:relative;width:100%;height:100%;min-height:260px;transition:transform .5s cubic-bezier(.4,.2,.2,1);transform-style:preserve-3d;}
+.card-face[aria-pressed="true"] .card-inner{transform:rotateY(180deg);}
+.face{position:absolute;inset:0;background:var(--card);border:1.5px solid var(--rule);border-radius:var(--radius);box-shadow:0 2px 0 var(--rule),0 10px 24px -12px rgba(35,32,26,.35);padding:2rem 1.75rem;display:flex;flex-direction:column;backface-visibility:hidden;-webkit-backface-visibility:hidden;}
+.face::before{content:"";position:absolute;left:1.75rem;right:1.75rem;top:3.2rem;height:2px;background:repeating-linear-gradient(to right,var(--rule) 0 10px,transparent 10px 16px);}
+.face .tag{font-family:'IBM Plex Mono',monospace;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:#fff;background:var(--accent-tab);padding:.25em .6em;border-radius:3px 3px 3px 0;}
+.face-badges{display:flex;align-items:center;gap:.5rem;align-self:flex-start;margin-bottom:1.4rem;}
+.verified-stamp-wrap{position:absolute;right:1.1rem;bottom:1.1rem;transform:rotate(-9deg);pointer-events:none;}
+.verified-stamp-ring{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.2rem;width:76px;height:76px;border-radius:50%;border:2px solid var(--accent);box-shadow:inset 0 0 0 3px var(--paper),inset 0 0 0 5px var(--accent);color:var(--accent);opacity:.88;}
+.verified-stamp-ring svg{flex:none;}
+.verified-stamp-text{font-family:'Public Sans',sans-serif;font-weight:800;font-size:.5rem;line-height:1.2;letter-spacing:.06em;text-align:center;text-transform:uppercase;}
+.face.back .tag{background:var(--accent-dark);}
+.face .content{font-family:'Public Sans',system-ui,sans-serif;font-weight:500;font-size:1.3rem;line-height:1.45;flex:1;display:flex;align-items:center;overflow-wrap:anywhere;}
+.face .idx{position:absolute;top:.9rem;right:1rem;font-family:'IBM Plex Mono',monospace;font-size:.75rem;color:var(--ink-soft);}
+.face.back{transform:rotateY(180deg);}
+.controls{display:flex;justify-content:center;align-items:center;gap:.6rem;flex-wrap:wrap;}
+.btn{font-family:'Public Sans',sans-serif;font-weight:600;font-size:.95rem;border-radius:8px;border:1.5px solid var(--accent-dark);background:var(--accent);color:#fff;padding:.7em 1.3em;min-height:44px;cursor:pointer;}
+.btn:hover{background:var(--accent-dark);}
+.btn.secondary{background:var(--card);color:var(--accent-dark);}
+.btn.secondary:hover{background:var(--paper-alt);}
+.btn:disabled{opacity:.5;cursor:not-allowed;}
+.hint{color:var(--ink-soft);font-size:.9rem;text-align:center;}
+#sr-status{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;}
+@media (prefers-reduced-motion: reduce){.card-inner{transition:none;}}
+@media (max-width:500px){.face .content{font-size:1.2rem;}}
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to main content</a>
+<header class="top">
+<span class="eyebrow">Catalog Drawer</span>
+<h1>4011flashcards</h1>
+</header>
+<main id="main">
+<div class="deck-meta"><span class="mono" id="progress"></span></div>
+<div class="stage">
+<button type="button" class="card-face" id="card-btn" aria-pressed="false">
+<span class="card-inner" id="card-inner">
+<span class="face front"><span class="idx mono" id="idx-front"></span><span class="face-badges"><span class="tag">Question</span></span><span class="content" id="front-text"></span></span>
+<span class="face back" aria-hidden="true"><span class="idx mono" id="idx-back"></span><span class="face-badges"><span class="tag">Answer</span></span><span class="content" id="back-text"></span><span class="verified-stamp-wrap" aria-hidden="true"><span class="verified-stamp-ring"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="verified-stamp-text">Verified<br>Correct</span></span></span></span>
+</span>
+</button>
+</div>
+<div class="controls">
+<button type="button" class="btn secondary" id="prev-btn">← Previous</button>
+<button type="button" class="btn" id="flip-btn">Flip card</button>
+<button type="button" class="btn secondary" id="next-btn">Next →</button>
+<button type="button" class="btn secondary" id="shuffle-btn">Shuffle</button>
+</div>
+<p class="hint">Press <kbd>Space</kbd> or <kbd>Enter</kbd> on the focused card to flip it, and use the ←/→ arrow keys to move between cards.</p>
+<div id="sr-status" aria-live="polite"></div>
+</main>
+<script>
+(function(){
+"use strict";
+var cards = [{"front":"Term: Countersinking","back":"Definition: A machining process that creates a conical recess so a fastener head sits flush with or below the surface of the material."},{"front":"Term: Flush Riveting","back":"Definition: A riveting technique where the rivet head is set flush with the skin surface, reducing aerodynamic drag."},{"front":"Term: Engineering Drawing","back":"Definition: A technical document providing all dimensions, tolerances, and specifications required to manufacture a part."},{"front":"Term: Fastener Callout","back":"Definition: A notation on a drawing identifying the type, size, material, and quantity of fasteners for a specific location."},{"front":"Term: Layout","back":"Definition: The process of transferring dimensions and hole locations from an engineering drawing onto a physical workpiece."},{"front":"Term: Datum","back":"Definition: A reference point, line, or surface from which all measurements on a drawing are taken."},{"front":"How is the minimum Edge Distance ($ED$) for most countersunk rivets calculated?","back":"$2 \\times$ Rivet Diameter; $ED$ is the distance from the center of a hole to the nearest edge of the material."},{"front":"What is the industry rule of thumb for minimum fastener Pitch ($P$)?","back":"$3 \\times$ Rivet Diameter; Pitch is the distance between the centers of adjacent fasteners in a row."},{"front":"Why is precise marking required before drilling a hole in aircraft assembly?","back":"Incorrect holes can compromise the structural integrity of the entire aircraft."},{"front":"Where on an engineering drawing is the Title Block typically located?","back":"The lower right corner."},{"front":"What information is contained in the Title Block of an engineering drawing?","back":"The part number, revision level, material specification, scale, and approval name."},{"front":"Which drawing view is used to reveal hidden interior features like countersink depths?","back":"Section views."},{"front":"What does the code 'MS20426' identify in a fastener callout?","back":"A $100^{\\circ}$ countersunk rivet (Military Standard)."},{"front":"In the callout MS20426AD4-6, what does the 'AD' represent?","back":"The material code for $2117-T4$ aluminum alloy."},{"front":"In the callout MS20426AD4-6, what does the '4' represent?","back":"The diameter in $1/32\"$ increments ($4/32\" = 1/8\"$)."},{"front":"In the callout MS20426AD4-6, what does the '6' represent?","back":"The length in $1/16\"$ increments ($6/16\" = 3/8\"$)."},{"front":"What is the minimum Edge Distance ($ED$) for a $1/8\"$ diameter rivet?","back":"$1/4\"$."},{"front":"What is the minimum Edge Distance ($ED$) for a $3/32\"$ diameter rivet?","back":"$3/16\"$."},{"front":"What is the minimum Edge Distance ($ED$) for a $5/32\"$ diameter rivet?","back":"$5/16\"$."},{"front":"What is the minimum Edge Distance ($ED$) for a $3/16\"$ diameter rivet?","back":"$3/8\"$."},{"front":"What section of a drawing contains critical instructions like 'ALL HOLES TO BE DEBURRED'?","back":"General Notes."},{"front":"What is the purpose of a Revision Block on an engineering drawing?","back":"To track changes to the drawing over time and ensure technicians use the latest version."},{"front":"What do triangle or flag symbols on a drawing indicate?","back":"Flag notes that apply only to a specific feature."},{"front":"Where does a technician obtain calibrated measuring tools and layout equipment in a professional shop?","back":"The Tool Crib or Stockroom."},{"front":"Which document lists required materials and provides quality sign-off checkpoints for a specific job?","back":"The Job Traveler or Work Order."},{"front":"What is the primary risk of scribing a layout line too deep into a metal surface?","back":"It can create a stress riser that weakens the material."},{"front":"What is the purpose of using a Center Punch before drilling?","back":"It creates an indentation to prevent the drill bit from 'walking' across the surface."},{"front":"Which layout tool is used to step off equal pitch spacing along a row of fasteners?","back":"Dividers or trammel points."},{"front":"What is the function of layout dye (Dykem) in the marking process?","back":"It provides a high-contrast blue coating that makes scribe lines highly visible."},{"front":"Why is a graphite pencil prohibited for marking aluminum aircraft parts?","back":"The graphite can cause galvanic corrosion on the aluminum surface."},{"front":"What is the first step in the complete marking process?","back":"Prepare the surface by cleaning it with an approved solvent."},{"front":"List two approved solvents for cleaning an aircraft skin panel before applying layout dye.","back":"MEK and isopropyl alcohol."},{"front":"What is the correct sequence for applying layout dye and marking?","back":"Clean, apply dye, dry, then scribe."},{"front":"How should a technician wipe a surface when cleaning with solvent?","back":"Wipe in one direction with a clean, lint-free cloth."},{"front":"At what angle should a scribe be held against a rule blade to ensure a fine line?","back":"$60-75^{\\circ}$."},{"front":"What is the first step in determining fastener locations on a part?","back":"Identify the datum (starting point) on both the drawing and the physical part."},{"front":"In the marking process, what step immediately follows scribing the layout lines?","back":"Marking hole centers (stepping off the pitch)."},{"front":"In the marking process, what step immediately follows marking the centers with dividers?","back":"Center punching the locations."},{"front":"Why must a technician avoid 'chain-measuring' from hole to hole?","back":"It causes cumulative errors that grow with each step."},{"front":"What should a technician do if the final hole center does not match the drawing's specified dimension?","back":"Recheck the divider pitch setting and restart the layout."},{"front":"How does a technician verify that two rows of fasteners are parallel?","back":"Measure the row spacing at both ends of the lines to ensure they are equal."},{"front":"What is the purpose of the final inspection before drilling begins?","back":"To verify that all marked locations, hole counts, and dimensions match the drawing exactly."},{"front":"Which FAA document covers acceptable methods for aircraft repair, including rivet spacing and edge distance?","back":"AC $43.13-1B$."},{"front":"Which aerospace quality management standard requires traceable workmanship and layout sign-offs?","back":"AS9100."},{"front":"What type of fastener combines a threaded pin and a collar for use in high-stress areas?","back":"Hi-Lok Fastener."},{"front":"What type of flush fastener is used when only one side of a structure is accessible?","back":"Blind Rivets (Cherry)."},{"front":"What error occurs if a technician measures from the wrong edge of a part?","back":"Wrong Datum error, which shifts every hole location."},{"front":"What action is required if marked holes are outside the specified location tolerance on a drawing?","back":"The error must be reported to the inspector."},{"front":"When using dividers to mark centers, where should the first leg be placed?","back":"At the calculated edge distance mark on the scribe line."},{"front":"What tool is recommended for center punching to ensure consistency and control?","back":"An automatic center punch."},{"front":"According to the module, what is a standard industry practice for reviewing layout before drilling?","back":"Getting a second set of eyes (coworker or inspector) to review the work."},{"front":"What should be done if layout dye is applied incorrectly or a mistake is made before punching?","back":"Clean the surface with solvent and re-apply the layout dye."},{"front":"Why is it important to extend the scribe line past the full length of the fastener row?","back":"To avoid losing the reference for the end holes."},{"front":"What is the consequence of air separation caused by protruding rivet heads on an aircraft skin?","back":"Increased fuel burn and aerodynamic drag."},{"front":"Name three common areas on an aircraft where flush riveting is standard.","back":"Fuselage skin panels, wing surfaces, and control surfaces."},{"front":"What should a technician confirm regarding their measuring tools before starting layout?","back":"That the tools are calibrated and free from damage or burrs."},{"front":"What must be counted and matched against the drawing before any punching occurs?","back":"The total number of marked hole centers."},{"front":"Why should nitrile gloves be worn during surface preparation?","back":"To avoid re-contaminating the clean surface with finger grease or oils."},{"front":"In the context of drawing projections, what are the four standard angles shown?","back":"Front, top, side, and section views."},{"front":"Which marking method is preferred for temporary marks on composite panels?","back":"Felt-tip markers."},{"front":"What defines the row of fasteners and serves as the line for stepping off pitch spacing?","back":"The scribe line."},{"front":"What is the primary role of a Transfer Punch?","back":"To mark hole centers through existing templates or drill jigs."},{"front":"A hole drilled in the wrong spot is considered a major _____ in production.","back":"Quality escape"},{"front":"Minimum edge distance is typically _____ the rivet diameter.","back":"$2 \\times$"},{"front":"Minimum pitch is typically _____ the rivet diameter.","back":"$3 \\times$"}];
+var order = cards.map(function(_, i){ return i; });
+var current = 0;
+var cardBtn = document.getElementById("card-btn");
+var frontText = document.getElementById("front-text");
+var backText = document.getElementById("back-text");
+var idxFront = document.getElementById("idx-front");
+var idxBack = document.getElementById("idx-back");
+var progressEl = document.getElementById("progress");
+var prevBtn = document.getElementById("prev-btn");
+var nextBtn = document.getElementById("next-btn");
+var flipBtn = document.getElementById("flip-btn");
+var shuffleBtn = document.getElementById("shuffle-btn");
+var srStatus = document.getElementById("sr-status");
+function shuffleArray(arr){ var a = arr.slice(); for (var i = a.length - 1; i > 0; i--){ var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+function renderCard(announce){
+  var c = cards[order[current]];
+  frontText.textContent = c.front;
+  backText.textContent = c.back;
+  idxFront.textContent = String(current + 1).padStart(3, "0");
+  idxBack.textContent = String(current + 1).padStart(3, "0");
+  cardBtn.setAttribute("aria-pressed", "false");
+  cardBtn.setAttribute("aria-label", "Question: " + c.front + ". Activate to show the answer.");
+  progressEl.textContent = "Card " + (current + 1) + " of " + cards.length;
+  if (announce) srStatus.textContent = "Card " + (current + 1) + " of " + cards.length + ". Question: " + c.front;
+  prevBtn.disabled = cards.length <= 1;
+  nextBtn.disabled = cards.length <= 1;
+}
+function flipCard(){
+  var pressed = cardBtn.getAttribute("aria-pressed") === "true";
+  var c = cards[order[current]];
+  if (pressed){
+    cardBtn.setAttribute("aria-pressed", "false");
+    cardBtn.setAttribute("aria-label", "Question: " + c.front + ". Activate to show the answer.");
+    srStatus.textContent = "Showing question: " + c.front;
+  } else {
+    cardBtn.setAttribute("aria-pressed", "true");
+    cardBtn.setAttribute("aria-label", "Verified answer: " + c.back + ". Activate to show the question.");
+    srStatus.textContent = "Showing verified answer: " + c.back;
+  }
+}
+function goTo(delta){
+  if (cards.length < 2) return;
+  current = (current + delta + cards.length) % cards.length;
+  renderCard(true);
+}
+cardBtn.addEventListener("click", flipCard);
+flipBtn.addEventListener("click", function(){ cardBtn.focus(); flipCard(); });
+prevBtn.addEventListener("click", function(){ goTo(-1); });
+nextBtn.addEventListener("click", function(){ goTo(1); });
+shuffleBtn.addEventListener("click", function(){ order = shuffleArray(order); current = 0; renderCard(false); srStatus.textContent = "Deck shuffled. Card 1 of " + cards.length; });
+document.addEventListener("keydown", function(e){
+  if (e.key === "ArrowLeft"){ e.preventDefault(); goTo(-1); }
+  else if (e.key === "ArrowRight"){ e.preventDefault(); goTo(1); }
+});
+if (cards.length){ renderCard(true); } else { progressEl.textContent = "No cards found."; }
+})();
+</script>
+</body>
+</html>
