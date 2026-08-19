@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AER4012flashcards (1) — Flashcards</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#F3F0E7;--paper-alt:#ECE6D6;--card:#FFFFFF;--ink:#23201A;--ink-soft:#5B564A;--accent:#145A4A;--accent-dark:#0E463A;--accent-tab:#8B3A2F;--rule:#D9D2C1;--focus:#0E463A;--radius:10px;font-size:16px;}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{background:var(--paper);color:var(--ink);font-family:'Public Sans',system-ui,sans-serif;line-height:1.5;min-height:100vh;}
+h1{font-family:'Public Sans',system-ui,sans-serif;font-weight:800;letter-spacing:-.01em;margin:0 0 .3em;}
+.mono{font-family:'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.02em;}
+.skip-link{position:absolute;left:-999px;top:0;background:var(--accent-dark);color:#fff;padding:.75em 1.25em;z-index:100;border-radius:0 0 8px 0;font-weight:600;}
+.skip-link:focus{left:0;}
+:focus-visible{outline:3px solid var(--focus);outline-offset:3px;}
+header.top{border-bottom:2px solid var(--ink);padding:1.75rem 1.5rem 1.25rem;max-width:700px;margin:0 auto;}
+header.top .eyebrow{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:.8rem;letter-spacing:.12em;text-transform:uppercase;color:var(--accent-dark);background:var(--paper-alt);border:1px solid var(--rule);padding:.2em .6em;border-radius:4px;margin-bottom:.6rem;}
+main{max-width:700px;margin:0 auto;padding:1.5rem;}
+.deck-meta{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.6rem;margin-bottom:1rem;}
+.stage{perspective:1400px;max-width:560px;margin:0 auto 1.25rem;}
+.card-face{position:relative;width:100%;min-height:260px;border-radius:var(--radius);background:transparent;border:none;padding:0;cursor:pointer;display:block;}
+.card-inner{display:block;position:relative;width:100%;height:100%;min-height:260px;transition:transform .5s cubic-bezier(.4,.2,.2,1);transform-style:preserve-3d;}
+.card-face[aria-pressed="true"] .card-inner{transform:rotateY(180deg);}
+.face{position:absolute;inset:0;background:var(--card);border:1.5px solid var(--rule);border-radius:var(--radius);box-shadow:0 2px 0 var(--rule),0 10px 24px -12px rgba(35,32,26,.35);padding:2rem 1.75rem;display:flex;flex-direction:column;backface-visibility:hidden;-webkit-backface-visibility:hidden;}
+.face::before{content:"";position:absolute;left:1.75rem;right:1.75rem;top:3.2rem;height:2px;background:repeating-linear-gradient(to right,var(--rule) 0 10px,transparent 10px 16px);}
+.face .tag{font-family:'IBM Plex Mono',monospace;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:#fff;background:var(--accent-tab);padding:.25em .6em;border-radius:3px 3px 3px 0;}
+.face-badges{display:flex;align-items:center;gap:.5rem;align-self:flex-start;margin-bottom:1.4rem;}
+.verified-stamp-wrap{position:absolute;right:1.1rem;bottom:1.1rem;transform:rotate(-9deg);pointer-events:none;}
+.verified-stamp-ring{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.2rem;width:76px;height:76px;border-radius:50%;border:2px solid var(--accent);box-shadow:inset 0 0 0 3px var(--paper),inset 0 0 0 5px var(--accent);color:var(--accent);opacity:.88;}
+.verified-stamp-ring svg{flex:none;}
+.verified-stamp-text{font-family:'Public Sans',sans-serif;font-weight:800;font-size:.5rem;line-height:1.2;letter-spacing:.06em;text-align:center;text-transform:uppercase;}
+.face.back .tag{background:var(--accent-dark);}
+.face .content{font-family:'Public Sans',system-ui,sans-serif;font-weight:500;font-size:1.3rem;line-height:1.45;flex:1;display:flex;align-items:center;overflow-wrap:anywhere;}
+.face .idx{position:absolute;top:.9rem;right:1rem;font-family:'IBM Plex Mono',monospace;font-size:.75rem;color:var(--ink-soft);}
+.face.back{transform:rotateY(180deg);}
+.controls{display:flex;justify-content:center;align-items:center;gap:.6rem;flex-wrap:wrap;}
+.btn{font-family:'Public Sans',sans-serif;font-weight:600;font-size:.95rem;border-radius:8px;border:1.5px solid var(--accent-dark);background:var(--accent);color:#fff;padding:.7em 1.3em;min-height:44px;cursor:pointer;}
+.btn:hover{background:var(--accent-dark);}
+.btn.secondary{background:var(--card);color:var(--accent-dark);}
+.btn.secondary:hover{background:var(--paper-alt);}
+.btn:disabled{opacity:.5;cursor:not-allowed;}
+.hint{color:var(--ink-soft);font-size:.9rem;text-align:center;}
+#sr-status{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;}
+@media (prefers-reduced-motion: reduce){.card-inner{transition:none;}}
+@media (max-width:500px){.face .content{font-size:1.2rem;}}
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to main content</a>
+<header class="top">
+<span class="eyebrow">Catalog Drawer</span>
+<h1>AER4012flashcards (1)</h1>
+</header>
+<main id="main">
+<div class="deck-meta"><span class="mono" id="progress"></span></div>
+<div class="stage">
+<button type="button" class="card-face" id="card-btn" aria-pressed="false">
+<span class="card-inner" id="card-inner">
+<span class="face front"><span class="idx mono" id="idx-front"></span><span class="face-badges"><span class="tag">Question</span></span><span class="content" id="front-text"></span></span>
+<span class="face back" aria-hidden="true"><span class="idx mono" id="idx-back"></span><span class="face-badges"><span class="tag">Answer</span></span><span class="content" id="back-text"></span><span class="verified-stamp-wrap" aria-hidden="true"><span class="verified-stamp-ring"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="verified-stamp-text">Verified<br>Correct</span></span></span></span>
+</span>
+</button>
+</div>
+<div class="controls">
+<button type="button" class="btn secondary" id="prev-btn">← Previous</button>
+<button type="button" class="btn" id="flip-btn">Flip card</button>
+<button type="button" class="btn secondary" id="next-btn">Next →</button>
+<button type="button" class="btn secondary" id="shuffle-btn">Shuffle</button>
+</div>
+<p class="hint">Press <kbd>Space</kbd> or <kbd>Enter</kbd> on the focused card to flip it, and use the ←/→ arrow keys to move between cards.</p>
+<div id="sr-status" aria-live="polite"></div>
+</main>
+<script>
+(function(){
+"use strict";
+var cards = [{"front":"What is the primary purpose of a pilot hole in aircraft assembly?","back":"To establish location accuracy and prevent larger drill bits from wandering."},{"front":"In aviation manufacturing, why is securing the workpiece rigid in a vise necessary?","back":"To prevent movement that causes hole elongation, burrs, or structural damage."},{"front":"Which specific step in a vise setup protects finished surfaces from steel jaw marks?","back":"Installing soft jaw covers, aluminum tape, or scrap material blocks."},{"front":"Before final clamping, how must a part be oriented relative to the drill's path?","back":"It must be positioned square to the travel path."},{"front":"Term: Bench Vise","back":"A heavy-duty vise mounted to a workbench used for larger assemblies and structural components."},{"front":"Which vise type is designed for use with drill presses to maintain perpendicularity?","back":"Drill Press Vise."},{"front":"Term: Angle Vise","back":"A vise that allows workpieces to be tilted for drilling holes at compound angles."},{"front":"What are the four sequence steps for securing an assembly in a vise?","back":"Inspect, Position, Protect, and Secure."},{"front":"Why must an assembler inspect the vise jaws for metal chips before loading a part?","back":"Debris can tilt the part out of alignment, causing every drilled hole to be off-location."},{"front":"Where should a workpiece be located between the vise jaws for optimal support?","back":"Centered between the jaws, rather than at the edge."},{"front":"Term: Clamping Force","back":"The amount of pressure applied by vise jaws to hold a workpiece without deforming it."},{"front":"What is the primary risk of over-clamping thin aluminum sheet metal?","back":"It can crush or distort the part, leading to out-of-round holes."},{"front":"Term: Drill Motor","back":"A pneumatic or electric handheld tool that spins a drill bit at controlled speeds."},{"front":"Why is the pneumatic drill motor the industry standard in aircraft manufacturing?","back":"It is lightweight, provides precise speed control, and eliminates electrical spark risks."},{"front":"Term: Chuck","back":"The jawed clamping mechanism on a drill motor that holds and releases the drill bit."},{"front":"Which drill motor component connects the motor to the chuck to transfer rotation?","back":"The spindle."},{"front":"What is the non-negotiable safety step required before touching a drill chuck or bit?","back":"Disconnect the drill motor from its air supply line."},{"front":"To loosen the jaws and open the chuck, which direction should the sleeve be rotated?","back":"Counterclockwise."},{"front":"When inserting a bit, how much of the shank should ideally be inside the chuck jaws?","back":"At least $\\frac{3}{4}$ of the shank length."},{"front":"Why must the chuck jaws grip the shank of the bit instead of the flutes?","back":"The flutes are sharp and fragile, and gripping them can damage the bit or prevent centering."},{"front":"What is the correct method for tightening a keyed chuck properly?","back":"Insert the key into all three chuck key holes in sequence and tighten firmly."},{"front":"What does a wobbling bit during a spin test indicate to the assembler?","back":"The bit is off-center or not fully seated and must be re-seated."},{"front":"What is the final verification step performed in open air after reconnecting the air supply?","back":"A brief run test to ensure the bit spins smoothly with no vibration."},{"front":"Term: Pilot Bit","back":"A small-diameter twist drill bit used specifically to drill the initial precisely located guide hole."},{"front":"In aircraft manufacturing, which system is most commonly used to size pilot bits?","back":"The number system (e.g., #30, #40)."},{"front":"What is the result of using a pilot bit that is dull or chipped?","back":"It produces oversized, rough holes and may break under load."},{"front":"Which tool confirms that a bit's actual diameter matches the engineering specification?","back":"A micrometer or drill gauge."},{"front":"Why is hearing protection required when operating pneumatic drill motors?","back":"The noise generated by these motors exceeds safe exposure limits."},{"front":"Which PPE protects against sharp metal edges and burrs during handling?","back":"Cut-resistant gloves."},{"front":"Potential Issue: Metal chips left in vise jaws. Mitigation: _____.","back":"Clean the jaws with a shop rag or brush before loading the workpiece."},{"front":"Potential Issue: Bare steel jaws marking finished surfaces. Mitigation: _____.","back":"Apply aluminum tape or use soft jaw caps to cushion the contact."},{"front":"How does drill bit speed (RPM) generally correlate with bit diameter?","back":"Smaller bits require higher RPM, while larger bits require lower RPM."},{"front":"Term: High-Speed Steel (HSS)","back":"The most common pilot bit material, suitable for aluminum alloys and mild steel."},{"front":"Concept: TiN-Coated Bit","back":"A gold-colored bit with a Titanium Nitride coating that reduces friction and extends life."},{"front":"Which bit material is necessary for drilling stainless steel and titanium alloys?","back":"Cobalt Steel."},{"front":"What are the benefits of applying cutting fluid during the drilling process?","back":"It reduces friction, extends bit life, and produces cleaner holes with less burring."},{"front":"How often should cutting fluid be re-applied during high-volume drilling?","back":"Every 3 to 5 holes or whenever drilling generates noticeable heat."},{"front":"Which FAA Advisory Circular covers acceptable methods for aircraft assembly and hole preparation?","back":"AC 43.13-1B."},{"front":"Term: First Article Inspection","back":"The process of measuring and verifying the first part drilled in a new setup before production continues."},{"front":"In an aviation quality system, what does a Nonconformance Report (NCR) document?","back":"Setup errors or out-of-tolerance holes that result in nonconforming parts."},{"front":"What should an assembler do if the only available bit in the bin has a chipped edge?","back":"Inform the lead and obtain a new replacement from stores."},{"front":"Why must you pull the quick-connect fitting away from the drill rather than just closing the air valve?","back":"Closing the valve can leave pressure in the line that allows accidental activation."},{"front":"A pneumatic drill motor's speed is measured in _____","back":"RPM (revolutions per minute)."},{"front":"What is the danger of drilling titanium and steel at speeds that are too high?","back":"It generates excessive heat that can dull bits and damage the material."},{"front":"When hand-tightening the chuck, what must be confirmed before applying tool tightening?","back":"That the bit is centered and running true."},{"front":"What is the memory tip provided for the direction of tightening and loosening fasteners or chucks?","back":"Righty tighty, lefty loosey."},{"front":"List the sequence for the bit installation process starting with safety.","back":"Disconnect air $\\rightarrow$ open chuck $\\rightarrow$ insert bit $\\rightarrow$ hand-tighten $\\rightarrow$ final tighten $\\rightarrow$ reconnect air $\\rightarrow$ spin test."},{"front":"Why should you never grip a drill bit by the flutes when inserting it into the chuck?","back":"The flutes are sharp, potentially causing injury, and fragile, potentially causing bit damage."},{"front":"Anatomy: Body / Housing","back":"The part of the drill motor containing the mechanism and providing the grip handle."},{"front":"How does cutting fluid use differ for titanium versus aluminum?","back":"Cutting fluid is required for titanium by most specifications, whereas it is recommended but optional for aluminum."}];
+var order = cards.map(function(_, i){ return i; });
+var current = 0;
+var cardBtn = document.getElementById("card-btn");
+var frontText = document.getElementById("front-text");
+var backText = document.getElementById("back-text");
+var idxFront = document.getElementById("idx-front");
+var idxBack = document.getElementById("idx-back");
+var progressEl = document.getElementById("progress");
+var prevBtn = document.getElementById("prev-btn");
+var nextBtn = document.getElementById("next-btn");
+var flipBtn = document.getElementById("flip-btn");
+var shuffleBtn = document.getElementById("shuffle-btn");
+var srStatus = document.getElementById("sr-status");
+function shuffleArray(arr){ var a = arr.slice(); for (var i = a.length - 1; i > 0; i--){ var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+function renderCard(announce){
+  var c = cards[order[current]];
+  frontText.textContent = c.front;
+  backText.textContent = c.back;
+  idxFront.textContent = String(current + 1).padStart(3, "0");
+  idxBack.textContent = String(current + 1).padStart(3, "0");
+  cardBtn.setAttribute("aria-pressed", "false");
+  cardBtn.setAttribute("aria-label", "Question: " + c.front + ". Activate to show the answer.");
+  progressEl.textContent = "Card " + (current + 1) + " of " + cards.length;
+  if (announce) srStatus.textContent = "Card " + (current + 1) + " of " + cards.length + ". Question: " + c.front;
+  prevBtn.disabled = cards.length <= 1;
+  nextBtn.disabled = cards.length <= 1;
+}
+function flipCard(){
+  var pressed = cardBtn.getAttribute("aria-pressed") === "true";
+  var c = cards[order[current]];
+  if (pressed){
+    cardBtn.setAttribute("aria-pressed", "false");
+    cardBtn.setAttribute("aria-label", "Question: " + c.front + ". Activate to show the answer.");
+    srStatus.textContent = "Showing question: " + c.front;
+  } else {
+    cardBtn.setAttribute("aria-pressed", "true");
+    cardBtn.setAttribute("aria-label", "Verified answer: " + c.back + ". Activate to show the question.");
+    srStatus.textContent = "Showing verified answer: " + c.back;
+  }
+}
+function goTo(delta){
+  if (cards.length < 2) return;
+  current = (current + delta + cards.length) % cards.length;
+  renderCard(true);
+}
+cardBtn.addEventListener("click", flipCard);
+flipBtn.addEventListener("click", function(){ cardBtn.focus(); flipCard(); });
+prevBtn.addEventListener("click", function(){ goTo(-1); });
+nextBtn.addEventListener("click", function(){ goTo(1); });
+shuffleBtn.addEventListener("click", function(){ order = shuffleArray(order); current = 0; renderCard(false); srStatus.textContent = "Deck shuffled. Card 1 of " + cards.length; });
+document.addEventListener("keydown", function(e){
+  if (e.key === "ArrowLeft"){ e.preventDefault(); goTo(-1); }
+  else if (e.key === "ArrowRight"){ e.preventDefault(); goTo(1); }
+});
+if (cards.length){ renderCard(true); } else { progressEl.textContent = "No cards found."; }
+})();
+</script>
+</body>
+</html>
