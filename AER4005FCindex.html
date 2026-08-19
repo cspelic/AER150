@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AER4005flashcards (1) — Flashcards</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#F3F0E7;--paper-alt:#ECE6D6;--card:#FFFFFF;--ink:#23201A;--ink-soft:#5B564A;--accent:#145A4A;--accent-dark:#0E463A;--accent-tab:#8B3A2F;--rule:#D9D2C1;--focus:#0E463A;--radius:10px;font-size:16px;}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{background:var(--paper);color:var(--ink);font-family:'Public Sans',system-ui,sans-serif;line-height:1.5;min-height:100vh;}
+h1{font-family:'Public Sans',system-ui,sans-serif;font-weight:800;letter-spacing:-.01em;margin:0 0 .3em;}
+.mono{font-family:'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.02em;}
+.skip-link{position:absolute;left:-999px;top:0;background:var(--accent-dark);color:#fff;padding:.75em 1.25em;z-index:100;border-radius:0 0 8px 0;font-weight:600;}
+.skip-link:focus{left:0;}
+:focus-visible{outline:3px solid var(--focus);outline-offset:3px;}
+header.top{border-bottom:2px solid var(--ink);padding:1.75rem 1.5rem 1.25rem;max-width:700px;margin:0 auto;}
+header.top .eyebrow{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:.8rem;letter-spacing:.12em;text-transform:uppercase;color:var(--accent-dark);background:var(--paper-alt);border:1px solid var(--rule);padding:.2em .6em;border-radius:4px;margin-bottom:.6rem;}
+main{max-width:700px;margin:0 auto;padding:1.5rem;}
+.deck-meta{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.6rem;margin-bottom:1rem;}
+.stage{perspective:1400px;max-width:560px;margin:0 auto 1.25rem;}
+.card-face{position:relative;width:100%;min-height:260px;border-radius:var(--radius);background:transparent;border:none;padding:0;cursor:pointer;display:block;}
+.card-inner{display:block;position:relative;width:100%;height:100%;min-height:260px;transition:transform .5s cubic-bezier(.4,.2,.2,1);transform-style:preserve-3d;}
+.card-face[aria-pressed="true"] .card-inner{transform:rotateY(180deg);}
+.face{position:absolute;inset:0;background:var(--card);border:1.5px solid var(--rule);border-radius:var(--radius);box-shadow:0 2px 0 var(--rule),0 10px 24px -12px rgba(35,32,26,.35);padding:2rem 1.75rem;display:flex;flex-direction:column;backface-visibility:hidden;-webkit-backface-visibility:hidden;}
+.face::before{content:"";position:absolute;left:1.75rem;right:1.75rem;top:3.2rem;height:2px;background:repeating-linear-gradient(to right,var(--rule) 0 10px,transparent 10px 16px);}
+.face .tag{font-family:'IBM Plex Mono',monospace;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:#fff;background:var(--accent-tab);padding:.25em .6em;border-radius:3px 3px 3px 0;}
+.face-badges{display:flex;align-items:center;gap:.5rem;align-self:flex-start;margin-bottom:1.4rem;}
+.verified-stamp-wrap{position:absolute;right:1.1rem;bottom:1.1rem;transform:rotate(-9deg);pointer-events:none;}
+.verified-stamp-ring{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.2rem;width:76px;height:76px;border-radius:50%;border:2px solid var(--accent);box-shadow:inset 0 0 0 3px var(--paper),inset 0 0 0 5px var(--accent);color:var(--accent);opacity:.88;}
+.verified-stamp-ring svg{flex:none;}
+.verified-stamp-text{font-family:'Public Sans',sans-serif;font-weight:800;font-size:.5rem;line-height:1.2;letter-spacing:.06em;text-align:center;text-transform:uppercase;}
+.face.back .tag{background:var(--accent-dark);}
+.face .content{font-family:'Public Sans',system-ui,sans-serif;font-weight:500;font-size:1.3rem;line-height:1.45;flex:1;display:flex;align-items:center;overflow-wrap:anywhere;}
+.face .idx{position:absolute;top:.9rem;right:1rem;font-family:'IBM Plex Mono',monospace;font-size:.75rem;color:var(--ink-soft);}
+.face.back{transform:rotateY(180deg);}
+.controls{display:flex;justify-content:center;align-items:center;gap:.6rem;flex-wrap:wrap;}
+.btn{font-family:'Public Sans',sans-serif;font-weight:600;font-size:.95rem;border-radius:8px;border:1.5px solid var(--accent-dark);background:var(--accent);color:#fff;padding:.7em 1.3em;min-height:44px;cursor:pointer;}
+.btn:hover{background:var(--accent-dark);}
+.btn.secondary{background:var(--card);color:var(--accent-dark);}
+.btn.secondary:hover{background:var(--paper-alt);}
+.btn:disabled{opacity:.5;cursor:not-allowed;}
+.hint{color:var(--ink-soft);font-size:.9rem;text-align:center;}
+#sr-status{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;}
+@media (prefers-reduced-motion: reduce){.card-inner{transition:none;}}
+@media (max-width:500px){.face .content{font-size:1.2rem;}}
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to main content</a>
+<header class="top">
+<span class="eyebrow">Catalog Drawer</span>
+<h1>AER4005flashcards (1)</h1>
+</header>
+<main id="main">
+<div class="deck-meta"><span class="mono" id="progress"></span></div>
+<div class="stage">
+<button type="button" class="card-face" id="card-btn" aria-pressed="false">
+<span class="card-inner" id="card-inner">
+<span class="face front"><span class="idx mono" id="idx-front"></span><span class="face-badges"><span class="tag">Question</span></span><span class="content" id="front-text"></span></span>
+<span class="face back" aria-hidden="true"><span class="idx mono" id="idx-back"></span><span class="face-badges"><span class="tag">Answer</span></span><span class="content" id="back-text"></span><span class="verified-stamp-wrap" aria-hidden="true"><span class="verified-stamp-ring"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="verified-stamp-text">Verified<br>Correct</span></span></span></span>
+</span>
+</button>
+</div>
+<div class="controls">
+<button type="button" class="btn secondary" id="prev-btn">← Previous</button>
+<button type="button" class="btn" id="flip-btn">Flip card</button>
+<button type="button" class="btn secondary" id="next-btn">Next →</button>
+<button type="button" class="btn secondary" id="shuffle-btn">Shuffle</button>
+</div>
+<p class="hint">Press <kbd>Space</kbd> or <kbd>Enter</kbd> on the focused card to flip it, and use the ←/→ arrow keys to move between cards.</p>
+<div id="sr-status" aria-live="polite"></div>
+</main>
+<script>
+(function(){
+"use strict";
+var cards = [{"front":"What is the primary defining characteristic of a protruding head rivet?","back":"The head extends above the surface of the material and is fully visible after installation."},{"front":"Which specific rivet head style is designated as AN470?","back":"The Universal head rivet."},{"front":"In what aircraft areas are protruding head rivets typically used where smoothness is not a priority?","back":"Interior structural frames and bulkheads."},{"front":"Name one specific application for protruding head rivets involving high-load joints.","back":"Joints requiring maximum shear strength."},{"front":"Term: Factory Head","back":"Definition: The pre-formed head of the rivet that the rivet gun drives against."},{"front":"Which part of the rivet is the cylindrical body that passes through the material stack?","back":"The shank."},{"front":"What is the alternative name for the bucktail formed during installation?","back":"The driven head (or driven shop head)."},{"front":"In the rivet code AN470AD4-6, what does the 'AD' signify?","back":"$2117-T4$ aluminum alloy."},{"front":"What unit of measurement is used for the diameter digit (e.g., '4') in an AN rivet code?","back":"$1/32$ inch increments."},{"front":"What unit of measurement is used for the length digit (e.g., '6') in an AN rivet code?","back":"$1/16$ inch increments."},{"front":"What is the resulting diameter in inches of a rivet with a size code of '4'?","back":"$1/8$ inch ($4/32$ inch)."},{"front":"What is the resulting length in inches of a rivet with a size code of '6'?","back":"$3/8$ inch ($6/16$ inch)."},{"front":"What term refers to the total thickness of all material layers joined by a rivet?","back":"Grip length."},{"front":"Formula: How is the required rivet length calculated based on grip length ($G$) and diameter ($D$)?","back":"$L = G + 1.5D$."},{"front":"What is the structural risk of installing a rivet that is too long?","back":"The shank may buckle inside the hole."},{"front":"What is the structural risk of installing a rivet that is too short?","back":"An undersized bucktail will be formed."},{"front":"Which tool is used to confirm the correct rivet length before starting installation?","back":"A rivet grip gauge (pin gauge)."},{"front":"How does a pneumatic rivet gun deliver energy to the rivet?","back":"Compressed air drives a piston to deliver rapid hammer blows to the rivet set."},{"front":"Which rivet gun size is matched for rivets up to $3/32$ inch in diameter?","back":"2X gun."},{"front":"Which rivet gun size is matched for rivets between $1/8$ inch and $5/32$ inch in diameter?","back":"3X gun."},{"front":"Which rivet gun size is matched for rivets $3/16$ inch and larger in diameter?","back":"4X gun."},{"front":"What is the purpose of a cup die (rivet set)?","back":"It transfers the rivet gun's energy directly to the factory head of the rivet."},{"front":"Why must the cup die precisely match the profile of the rivet head?","back":"An incorrect fit will damage the factory head and cause rejection."},{"front":"What safety step must be performed immediately after installing a cup die into a rivet gun?","back":"A function check by applying brief air pressure while pointed away from personnel."},{"front":"Rivet guns operate at noise levels exceeding _____ decibels.","back":"$110$ dB."},{"front":"What safety component must be inspected before every use to prevent the die from ejecting?","back":"The retaining spring."},{"front":"Inspection Tool: Gap Inspection Shim","back":"Purpose: Detects gaps between the rivet head and the work surface not visible to the naked eye."},{"front":"Inspection Tool: Spoon Gauge","back":"Purpose: Measures the driven head (bucktail) diameter and height in a single placement."},{"front":"Inspection Tool: H-Gauge","back":"Purpose: Directly measures the height of the bucktail above the work surface."},{"front":"What is the primary purpose of a bucking bar?","back":"It provides the reaction mass that deforms the rivet shank into a bucktail."},{"front":"Role: The Gunner","back":"Responsibility: Controls the trigger, maintains gun alignment, and applies pressure perpendicular to the surface."},{"front":"Role: The Bucker","back":"Responsibility: Holds the bucking bar firmly against the shank and signals when driving is complete."},{"front":"What is the recommended air pressure range for driving $3/32$ inch rivets?","back":"$40\\text{--}50$ PSI."},{"front":"What is the recommended air pressure range for driving $1/8$ inch rivets?","back":"$50\\text{--}60$ PSI."},{"front":"What is the recommended air pressure range for driving $5/32$ inch rivets?","back":"$60\\text{--}70$ PSI."},{"front":"What is the recommended air pressure range for driving $3/16$ inch rivets?","back":"$70\\text{--}80$ PSI."},{"front":"Why is it mandatory to drive test rivets on scrap material before working on an aircraft structure?","back":"To confirm the air pressure and setup are correct for the specific alloy and thickness."},{"front":"What is the professional standard for the duration of trigger bursts when driving a rivet?","back":"Short bursts of $1\\text{--}2$ seconds."},{"front":"Why must the rivet gun be held perfectly perpendicular to the work surface?","back":"To prevent the die from slipping and damaging the factory head or skin."},{"front":"What is the minimum acceptable diameter for a correctly driven bucktail?","back":"$1.5 \\times$ the original rivet shank diameter ($1.5D$)."},{"front":"What is the minimum acceptable height for a correctly driven bucktail?","back":"$0.5 \\times$ the original rivet shank diameter ($0.5D$)."},{"front":"What defect is characterized by a bucktail that is too tall and too narrow?","back":"Under-driven rivet."},{"front":"What defect is characterized by a bucktail that is too flat and wide?","back":"Over-driven rivet."},{"front":"What causes a 'smiling' rivet defect?","back":"The cup die slipped off the factory head during driving."},{"front":"What does an off-center or oval bucktail indicate regarding technique?","back":"Misalignment of the bucking bar during the driving sequence."},{"front":"During visual inspection, what must be checked regarding the surrounding skin?","back":"The presence of dings, dents, or tool marks caused by the gun or bucking bar."},{"front":"What is the standard thickness of a gap inspection shim?","back":"$0.005$ inches."},{"front":"What is the acceptance criterion when using a gap inspection shim?","back":"The shim cannot be inserted under any part of the rivet head perimeter."},{"front":"Why is it forbidden to 'tap down' or re-drive a rivet that fails a gap test?","back":"It will not fix the condition and may enlarge the hole, violating standards."},{"front":"In the spoon gauge 'GO' check, what indicates the diameter is sufficient?","back":"The bucktail contacts the inner diameter wall of the spoon pocket when centered."},{"front":"What indicates a bucktail is under-driven when using a spoon gauge?","back":"The bucktail falls away from (does not contact) the top of the pocket."},{"front":"How is an H-gauge zeroed before inspection?","back":"Place it on a flat, clean reference surface and adjust the indicator to zero."},{"front":"What is the governing value for acceptance when taking multiple H-gauge readings around a bucktail?","back":"The lowest reading."},{"front":"Identify the four stages of the complete rivet inspection sequence in order.","back":"1. Visual Inspection, 2. Gap Inspection Shim, 3. Spoon Gauge, 4. H-Gauge."},{"front":"What size drill bit should be selected when drilling out a rejected rivet?","back":"One size smaller than the rivet shank diameter."},{"front":"Where must a center-punch be placed before drilling out a rivet?","back":"Precisely on the center of the factory head."},{"front":"What is the maximum depth a drill should go when removing a rivet head?","back":"No deeper than the thickness of the rivet head."},{"front":"How is the remaining rivet shank removed after the head has been drilled through?","back":"By using a pin punch to drive the shank out from the factory head side."},{"front":"Identify the condition: A rivet head is not fully seated against the material.","back":"Gap under head."},{"front":"Identify the condition: The rivet is not perpendicular to the work surface.","back":"Cocked rivet."},{"front":"What is the primary consequence of a gap under a rivet head besides reduced strength?","back":"It creates a path for moisture intrusion and corrosion."},{"front":"Process: Step 1 of the driving sequence","back":"Insert Rivet."},{"front":"Process: Step 2 of the driving sequence","back":"Place Cup Die."},{"front":"Process: Step 3 of the driving sequence","back":"Position Bucker."},{"front":"Process: Step 4 of the driving sequence","back":"Drive in Bursts."},{"front":"What must the gunner do before pulling the trigger to prevent 'peening' damage?","back":"Press the gun firmly into the rivet head to prevent bouncing."},{"front":"How can the bucker ensure they provide sufficient reaction mass?","back":"By selecting a bucking bar heavy enough for the specific rivet diameter."},{"front":"What must be verified on a precision instrument like an H-gauge before use?","back":"The current calibration status (via the calibration sticker)."},{"front":"Why is 'Short Bursts Only' a critical driving technique?","back":"It allows the team to check progress and avoid over-driving, as a rivet cannot be 'un-driven'."},{"front":"What is the standard requirement for the bucktail's appearance relative to the hole?","back":"It must be round, symmetrical, and centered over the hole."}];
+var order = cards.map(function(_, i){ return i; });
+var current = 0;
+var cardBtn = document.getElementById("card-btn");
+var frontText = document.getElementById("front-text");
+var backText = document.getElementById("back-text");
+var idxFront = document.getElementById("idx-front");
+var idxBack = document.getElementById("idx-back");
+var progressEl = document.getElementById("progress");
+var prevBtn = document.getElementById("prev-btn");
+var nextBtn = document.getElementById("next-btn");
+var flipBtn = document.getElementById("flip-btn");
+var shuffleBtn = document.getElementById("shuffle-btn");
+var srStatus = document.getElementById("sr-status");
+function shuffleArray(arr){ var a = arr.slice(); for (var i = a.length - 1; i > 0; i--){ var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+function renderCard(announce){
+  var c = cards[order[current]];
+  frontText.textContent = c.front;
+  backText.textContent = c.back;
+  idxFront.textContent = String(current + 1).padStart(3, "0");
+  idxBack.textContent = String(current + 1).padStart(3, "0");
+  cardBtn.setAttribute("aria-pressed", "false");
+  cardBtn.setAttribute("aria-label", "Question: " + c.front + ". Activate to show the answer.");
+  progressEl.textContent = "Card " + (current + 1) + " of " + cards.length;
+  if (announce) srStatus.textContent = "Card " + (current + 1) + " of " + cards.length + ". Question: " + c.front;
+  prevBtn.disabled = cards.length <= 1;
+  nextBtn.disabled = cards.length <= 1;
+}
+function flipCard(){
+  var pressed = cardBtn.getAttribute("aria-pressed") === "true";
+  var c = cards[order[current]];
+  if (pressed){
+    cardBtn.setAttribute("aria-pressed", "false");
+    cardBtn.setAttribute("aria-label", "Question: " + c.front + ". Activate to show the answer.");
+    srStatus.textContent = "Showing question: " + c.front;
+  } else {
+    cardBtn.setAttribute("aria-pressed", "true");
+    cardBtn.setAttribute("aria-label", "Verified answer: " + c.back + ". Activate to show the question.");
+    srStatus.textContent = "Showing verified answer: " + c.back;
+  }
+}
+function goTo(delta){
+  if (cards.length < 2) return;
+  current = (current + delta + cards.length) % cards.length;
+  renderCard(true);
+}
+cardBtn.addEventListener("click", flipCard);
+flipBtn.addEventListener("click", function(){ cardBtn.focus(); flipCard(); });
+prevBtn.addEventListener("click", function(){ goTo(-1); });
+nextBtn.addEventListener("click", function(){ goTo(1); });
+shuffleBtn.addEventListener("click", function(){ order = shuffleArray(order); current = 0; renderCard(false); srStatus.textContent = "Deck shuffled. Card 1 of " + cards.length; });
+document.addEventListener("keydown", function(e){
+  if (e.key === "ArrowLeft"){ e.preventDefault(); goTo(-1); }
+  else if (e.key === "ArrowRight"){ e.preventDefault(); goTo(1); }
+});
+if (cards.length){ renderCard(true); } else { progressEl.textContent = "No cards found."; }
+})();
+</script>
+</body>
+</html>
