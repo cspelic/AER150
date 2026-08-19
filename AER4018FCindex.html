@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>flashcards (2) — Flashcards</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#F3F0E7;--paper-alt:#ECE6D6;--card:#FFFFFF;--ink:#23201A;--ink-soft:#5B564A;--accent:#145A4A;--accent-dark:#0E463A;--accent-tab:#8B3A2F;--rule:#D9D2C1;--focus:#0E463A;--radius:10px;font-size:16px;}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{background:var(--paper);color:var(--ink);font-family:'Public Sans',system-ui,sans-serif;line-height:1.5;min-height:100vh;}
+h1{font-family:'Public Sans',system-ui,sans-serif;font-weight:800;letter-spacing:-.01em;margin:0 0 .3em;}
+.mono{font-family:'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.02em;}
+.skip-link{position:absolute;left:-999px;top:0;background:var(--accent-dark);color:#fff;padding:.75em 1.25em;z-index:100;border-radius:0 0 8px 0;font-weight:600;}
+.skip-link:focus{left:0;}
+:focus-visible{outline:3px solid var(--focus);outline-offset:3px;}
+header.top{border-bottom:2px solid var(--ink);padding:1.75rem 1.5rem 1.25rem;max-width:700px;margin:0 auto;}
+header.top .eyebrow{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:.8rem;letter-spacing:.12em;text-transform:uppercase;color:var(--accent-dark);background:var(--paper-alt);border:1px solid var(--rule);padding:.2em .6em;border-radius:4px;margin-bottom:.6rem;}
+main{max-width:700px;margin:0 auto;padding:1.5rem;}
+.deck-meta{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.6rem;margin-bottom:1rem;}
+.stage{perspective:1400px;max-width:560px;margin:0 auto 1.25rem;}
+.card-face{position:relative;width:100%;min-height:260px;border-radius:var(--radius);background:transparent;border:none;padding:0;cursor:pointer;display:block;}
+.card-inner{display:block;position:relative;width:100%;height:100%;min-height:260px;transition:transform .5s cubic-bezier(.4,.2,.2,1);transform-style:preserve-3d;}
+.card-face[aria-pressed="true"] .card-inner{transform:rotateY(180deg);}
+.face{position:absolute;inset:0;background:var(--card);border:1.5px solid var(--rule);border-radius:var(--radius);box-shadow:0 2px 0 var(--rule),0 10px 24px -12px rgba(35,32,26,.35);padding:2rem 1.75rem;display:flex;flex-direction:column;backface-visibility:hidden;-webkit-backface-visibility:hidden;}
+.face::before{content:"";position:absolute;left:1.75rem;right:1.75rem;top:3.2rem;height:2px;background:repeating-linear-gradient(to right,var(--rule) 0 10px,transparent 10px 16px);}
+.face .tag{font-family:'IBM Plex Mono',monospace;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:#fff;background:var(--accent-tab);padding:.25em .6em;border-radius:3px 3px 3px 0;}
+.face-badges{display:flex;align-items:center;gap:.5rem;align-self:flex-start;margin-bottom:1.4rem;}
+.verified-stamp-wrap{position:absolute;right:1.1rem;bottom:1.1rem;transform:rotate(-9deg);pointer-events:none;}
+.verified-stamp-ring{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.2rem;width:76px;height:76px;border-radius:50%;border:2px solid var(--accent);box-shadow:inset 0 0 0 3px var(--paper),inset 0 0 0 5px var(--accent);color:var(--accent);opacity:.88;}
+.verified-stamp-ring svg{flex:none;}
+.verified-stamp-text{font-family:'Public Sans',sans-serif;font-weight:800;font-size:.5rem;line-height:1.2;letter-spacing:.06em;text-align:center;text-transform:uppercase;}
+.face.back .tag{background:var(--accent-dark);}
+.face .content{font-family:'Public Sans',system-ui,sans-serif;font-weight:500;font-size:1.3rem;line-height:1.45;flex:1;display:flex;align-items:center;overflow-wrap:anywhere;}
+.face .idx{position:absolute;top:.9rem;right:1rem;font-family:'IBM Plex Mono',monospace;font-size:.75rem;color:var(--ink-soft);}
+.face.back{transform:rotateY(180deg);}
+.controls{display:flex;justify-content:center;align-items:center;gap:.6rem;flex-wrap:wrap;}
+.btn{font-family:'Public Sans',sans-serif;font-weight:600;font-size:.95rem;border-radius:8px;border:1.5px solid var(--accent-dark);background:var(--accent);color:#fff;padding:.7em 1.3em;min-height:44px;cursor:pointer;}
+.btn:hover{background:var(--accent-dark);}
+.btn.secondary{background:var(--card);color:var(--accent-dark);}
+.btn.secondary:hover{background:var(--paper-alt);}
+.btn:disabled{opacity:.5;cursor:not-allowed;}
+.hint{color:var(--ink-soft);font-size:.9rem;text-align:center;}
+#sr-status{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;}
+@media (prefers-reduced-motion: reduce){.card-inner{transition:none;}}
+@media (max-width:500px){.face .content{font-size:1.2rem;}}
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to main content</a>
+<header class="top">
+<span class="eyebrow">Catalog Drawer</span>
+<h1>flashcards (2)</h1>
+</header>
+<main id="main">
+<div class="deck-meta"><span class="mono" id="progress"></span></div>
+<div class="stage">
+<button type="button" class="card-face" id="card-btn" aria-pressed="false">
+<span class="card-inner" id="card-inner">
+<span class="face front"><span class="idx mono" id="idx-front"></span><span class="face-badges"><span class="tag">Question</span></span><span class="content" id="front-text"></span></span>
+<span class="face back" aria-hidden="true"><span class="idx mono" id="idx-back"></span><span class="face-badges"><span class="tag">Answer</span></span><span class="content" id="back-text"></span><span class="verified-stamp-wrap" aria-hidden="true"><span class="verified-stamp-ring"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="verified-stamp-text">Verified<br>Correct</span></span></span></span>
+</span>
+</button>
+</div>
+<div class="controls">
+<button type="button" class="btn secondary" id="prev-btn">← Previous</button>
+<button type="button" class="btn" id="flip-btn">Flip card</button>
+<button type="button" class="btn secondary" id="next-btn">Next →</button>
+<button type="button" class="btn secondary" id="shuffle-btn">Shuffle</button>
+</div>
+<p class="hint">Press <kbd>Space</kbd> or <kbd>Enter</kbd> on the focused card to flip it, and use the ←/→ arrow keys to move between cards.</p>
+<div id="sr-status" aria-live="polite"></div>
+</main>
+<script>
+(function(){
+"use strict";
+var cards = [{"front":"What type of structural fastener consists of a threaded pin and a collar designed for consistent torque?","back":"A Hi-Lok fastener."},{"front":"Why are Hi-Loks preferred in aerospace applications regarding installer judgment?","back":"They deliver precise clamp-up force without relying on the installer's judgment for torque."},{"front":"The standard diameter of the Hi-Lok fasteners discussed in this technical guide is $\\frac{5}{16}$ inch.","back":"True."},{"front":"How does the Hi-Lok fastener's strength compare to a standard rivet?","back":"It provides superior tensile and shear strength."},{"front":"What specific feature in the tip of a Hi-Lok pin allows it to be held stationary during installation?","back":"A wrenching hex recess."},{"front":"The Hi-Lok pin head style that sits level with the work surface is called the $100^\\circ$ _____ head.","back":"Countersunk (or flush)"},{"front":"What part of the Hi-Lok collar is designed to separate automatically when the correct torque value is reached?","back":"The wrenching element."},{"front":"Hi-Lok pins and collars are identified by _____ _____, which encode diameter, grip length, material, and head style.","back":"Part numbers"},{"front":"What must a technician cross-reference before beginning a $\\frac{5}{16}$ inch Hi-Lok installation to ensure component compatibility?","back":"The engineering drawing."},{"front":"Tool: Rivet Gun","back":"Installation Function: Holds the Hi-Lok pin stationary and prevents it from rotating while the collar is torqued."},{"front":"Tool: Pneumatic Torque Tool","back":"Installation Function: Uses compressed air to spin and torque the collar onto the pin until the wrenching element shears."},{"front":"Tool: Manual Torque Tool","back":"Installation Function: Provides tactile feedback for torquing collars in tight areas or when pneumatic tools are unavailable."},{"front":"Tool: Hex-socket set (on rivet gun)","back":"Installation Function: Engages the hex recess in the tip of the pin to keep it stationary."},{"front":"Tool: Hi-Lok collar socket","back":"Installation Function: Attaches to the torque tool drive and fits over the collar's wrenching element."},{"front":"Tool: Gap Inspection Shim","back":"Verification Task: Checks for any unacceptable gap between the manufactured head of the pin and the work piece surface."},{"front":"Tool: Pink Protrusion Gauge","back":"Verification Task: Verifies that the correct number of pin threads protrude through the installed collar to ensure full engagement."},{"front":"What is the primary risk of using an incorrect hex socket size on the Hi-Lok pin tip?","back":"It may strip the hex recess and render the fastener uninstallable."},{"front":"During setup, the rivet gun air pressure should be regulated for _____ rather than driving.","back":"Holding"},{"front":"What is the first step in the Hi-Lok installation sequence?","back":"Hole Preparation."},{"front":"In the installation sequence, what action follows 'Hole Preparation' but precedes 'Collar Threading'?","back":"Pin Insertion."},{"front":"What task must be performed on both sides of a newly drilled hole to remove raised material?","back":"Deburring."},{"front":"From which side of the work piece must the Hi-Lok pin be inserted?","back":"The front (manufactured head side)."},{"front":"How should a protruding head Hi-Lok rest against the work piece surface once inserted?","back":"Flush with no gap."},{"front":"What technique is used during collar installation if one technician cannot hold the head side while another torques the collar?","back":"Use of a bucking bar or holding tool."},{"front":"Technicians must hand-thread the collar for at least _____ full turns to prevent cross-threading.","back":"Two"},{"front":"What is the correct action to take with the torque tool trigger immediately after the collar shears?","back":"Release the trigger immediately."},{"front":"What physical sensation indicates the torque tool has reached the design break-off torque?","back":"A distinct snap or pop."},{"front":"How does the torque tool behave once the collar's wrenching element has sheared off?","back":"It will spin freely."},{"front":"What result during gap shim inspection indicates a 'PASS'?","back":"The shim cannot enter the gap at any point around the head circumference."},{"front":"What result during gap shim inspection indicates a 'FAIL'?","back":"The shim slides into the gap between the fastener head and the work piece."},{"front":"Why is a gapped Hi-Lok head unacceptable in aircraft assembly?","back":"It indicates the fastener may not be providing the correct clamp-up load."},{"front":"What is a common cause of head gaps where the pin is too long for the material thickness?","back":"Incorrect grip length."},{"front":"What is the typical minimum thread protrusion requirement beyond the collar face for Hi-Lok installations?","back":"One full thread."},{"front":"What risk is associated with insufficient thread protrusion in a Hi-Lok joint?","back":"The collar could back off under vibration or load."},{"front":"When using a pink protrusion gauge, the _____ side must fully pass over the protruding threads.","back":"GO"},{"front":"When using a pink protrusion gauge, the _____ side must NOT pass over the threads.","back":"NO-GO"},{"front":"A result where the NO-GO side of a protrusion gauge passes freely indicates _____ thread protrusion.","back":"Excessive"},{"front":"What is the primary cause of collar binding or stripped threads during installation?","back":"Cross-threading (not starting the collar by hand)."},{"front":"What installation error occurs if the torque tool is angled away from the fastener axis?","back":"Tool misalignment."},{"front":"Why is eye protection critical during Hi-Lok collar installation?","back":"The wrenching element fragment is ejected at high speed during shear-off."},{"front":"When must air supply be disconnected from a pneumatic torque tool?","back":"When changing sockets or performing maintenance."},{"front":"Every installed fastener in an aircraft must be _____ to ensure it meets FAA and quality standards.","back":"Traceable"},{"front":"What quality record item confirms that the specific $\\frac{5}{16}$ inch pin and collar were correct for the drawing?","back":"Fastener part numbers."},{"front":"Term: Grip Length","back":"Definition: The thickness of material through which the fastener passes; it must match the structural stack thickness."},{"front":"Term: Manufactured Head","back":"Definition: The head of the Hi-Lok pin located on the installation entry side of the work piece."},{"front":"Why is it forbidden to use an impact function during collar torquing?","back":"It can damage the fastener."},{"front":"What part of the Hi-Lok pin must be checked for damage and accessibility before torquing the collar?","back":"The hex recess in the tip."},{"front":"What happens if a technician uses an undersized collar on a Hi-Lok pin?","back":"The threads will strip."},{"front":"What does a 'premature shear-off' typically indicate about the collar?","back":"The collar is damaged or incorrect for the application."},{"front":"The pink protrusion gauge is held _____ to the fastener axis during inspection.","back":"Perpendicular"}];
+var order = cards.map(function(_, i){ return i; });
+var current = 0;
+var cardBtn = document.getElementById("card-btn");
+var frontText = document.getElementById("front-text");
+var backText = document.getElementById("back-text");
+var idxFront = document.getElementById("idx-front");
+var idxBack = document.getElementById("idx-back");
+var progressEl = document.getElementById("progress");
+var prevBtn = document.getElementById("prev-btn");
+var nextBtn = document.getElementById("next-btn");
+var flipBtn = document.getElementById("flip-btn");
+var shuffleBtn = document.getElementById("shuffle-btn");
+var srStatus = document.getElementById("sr-status");
+function shuffleArray(arr){ var a = arr.slice(); for (var i = a.length - 1; i > 0; i--){ var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+function renderCard(announce){
+  var c = cards[order[current]];
+  frontText.textContent = c.front;
+  backText.textContent = c.back;
+  idxFront.textContent = String(current + 1).padStart(3, "0");
+  idxBack.textContent = String(current + 1).padStart(3, "0");
+  cardBtn.setAttribute("aria-pressed", "false");
+  cardBtn.setAttribute("aria-label", "Question: " + c.front + ". Activate to show the answer.");
+  progressEl.textContent = "Card " + (current + 1) + " of " + cards.length;
+  if (announce) srStatus.textContent = "Card " + (current + 1) + " of " + cards.length + ". Question: " + c.front;
+  prevBtn.disabled = cards.length <= 1;
+  nextBtn.disabled = cards.length <= 1;
+}
+function flipCard(){
+  var pressed = cardBtn.getAttribute("aria-pressed") === "true";
+  var c = cards[order[current]];
+  if (pressed){
+    cardBtn.setAttribute("aria-pressed", "false");
+    cardBtn.setAttribute("aria-label", "Question: " + c.front + ". Activate to show the answer.");
+    srStatus.textContent = "Showing question: " + c.front;
+  } else {
+    cardBtn.setAttribute("aria-pressed", "true");
+    cardBtn.setAttribute("aria-label", "Verified answer: " + c.back + ". Activate to show the question.");
+    srStatus.textContent = "Showing verified answer: " + c.back;
+  }
+}
+function goTo(delta){
+  if (cards.length < 2) return;
+  current = (current + delta + cards.length) % cards.length;
+  renderCard(true);
+}
+cardBtn.addEventListener("click", flipCard);
+flipBtn.addEventListener("click", function(){ cardBtn.focus(); flipCard(); });
+prevBtn.addEventListener("click", function(){ goTo(-1); });
+nextBtn.addEventListener("click", function(){ goTo(1); });
+shuffleBtn.addEventListener("click", function(){ order = shuffleArray(order); current = 0; renderCard(false); srStatus.textContent = "Deck shuffled. Card 1 of " + cards.length; });
+document.addEventListener("keydown", function(e){
+  if (e.key === "ArrowLeft"){ e.preventDefault(); goTo(-1); }
+  else if (e.key === "ArrowRight"){ e.preventDefault(); goTo(1); }
+});
+if (cards.length){ renderCard(true); } else { progressEl.textContent = "No cards found."; }
+})();
+</script>
+</body>
+</html>
