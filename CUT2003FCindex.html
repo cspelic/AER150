@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CUT2003flashcards — Flashcards</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#F3F0E7;--paper-alt:#ECE6D6;--card:#FFFFFF;--ink:#23201A;--ink-soft:#5B564A;--accent:#145A4A;--accent-dark:#0E463A;--accent-tab:#8B3A2F;--rule:#D9D2C1;--focus:#0E463A;--radius:10px;font-size:16px;}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{background:var(--paper);color:var(--ink);font-family:'Public Sans',system-ui,sans-serif;line-height:1.5;min-height:100vh;}
+h1{font-family:'Public Sans',system-ui,sans-serif;font-weight:800;letter-spacing:-.01em;margin:0 0 .3em;}
+.mono{font-family:'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.02em;}
+.skip-link{position:absolute;left:-999px;top:0;background:var(--accent-dark);color:#fff;padding:.75em 1.25em;z-index:100;border-radius:0 0 8px 0;font-weight:600;}
+.skip-link:focus{left:0;}
+:focus-visible{outline:3px solid var(--focus);outline-offset:3px;}
+header.top{border-bottom:2px solid var(--ink);padding:1.75rem 1.5rem 1.25rem;max-width:700px;margin:0 auto;}
+header.top .eyebrow{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:.8rem;letter-spacing:.12em;text-transform:uppercase;color:var(--accent-dark);background:var(--paper-alt);border:1px solid var(--rule);padding:.2em .6em;border-radius:4px;margin-bottom:.6rem;}
+main{max-width:700px;margin:0 auto;padding:1.5rem;}
+.deck-meta{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.6rem;margin-bottom:1rem;}
+.stage{perspective:1400px;max-width:560px;margin:0 auto 1.25rem;}
+.card-face{position:relative;width:100%;min-height:260px;border-radius:var(--radius);background:transparent;border:none;padding:0;cursor:pointer;display:block;}
+.card-inner{display:block;position:relative;width:100%;height:100%;min-height:260px;transition:transform .5s cubic-bezier(.4,.2,.2,1);transform-style:preserve-3d;}
+.card-face[aria-pressed="true"] .card-inner{transform:rotateY(180deg);}
+.face{position:absolute;inset:0;background:var(--card);border:1.5px solid var(--rule);border-radius:var(--radius);box-shadow:0 2px 0 var(--rule),0 10px 24px -12px rgba(35,32,26,.35);padding:2rem 1.75rem;display:flex;flex-direction:column;backface-visibility:hidden;-webkit-backface-visibility:hidden;}
+.face::before{content:"";position:absolute;left:1.75rem;right:1.75rem;top:3.2rem;height:2px;background:repeating-linear-gradient(to right,var(--rule) 0 10px,transparent 10px 16px);}
+.face .tag{font-family:'IBM Plex Mono',monospace;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:#fff;background:var(--accent-tab);padding:.25em .6em;border-radius:3px 3px 3px 0;}
+.face-badges{display:flex;align-items:center;gap:.5rem;align-self:flex-start;margin-bottom:1.4rem;}
+.verified-stamp-wrap{position:absolute;right:1.1rem;bottom:1.1rem;transform:rotate(-9deg);pointer-events:none;}
+.verified-stamp-ring{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.2rem;width:76px;height:76px;border-radius:50%;border:2px solid var(--accent);box-shadow:inset 0 0 0 3px var(--paper),inset 0 0 0 5px var(--accent);color:var(--accent);opacity:.88;}
+.verified-stamp-ring svg{flex:none;}
+.verified-stamp-text{font-family:'Public Sans',sans-serif;font-weight:800;font-size:.5rem;line-height:1.2;letter-spacing:.06em;text-align:center;text-transform:uppercase;}
+.face.back .tag{background:var(--accent-dark);}
+.face .content{font-family:'Public Sans',system-ui,sans-serif;font-weight:500;font-size:1.3rem;line-height:1.45;flex:1;display:flex;align-items:center;overflow-wrap:anywhere;}
+.face .idx{position:absolute;top:.9rem;right:1rem;font-family:'IBM Plex Mono',monospace;font-size:.75rem;color:var(--ink-soft);}
+.face.back{transform:rotateY(180deg);}
+.controls{display:flex;justify-content:center;align-items:center;gap:.6rem;flex-wrap:wrap;}
+.btn{font-family:'Public Sans',sans-serif;font-weight:600;font-size:.95rem;border-radius:8px;border:1.5px solid var(--accent-dark);background:var(--accent);color:#fff;padding:.7em 1.3em;min-height:44px;cursor:pointer;}
+.btn:hover{background:var(--accent-dark);}
+.btn.secondary{background:var(--card);color:var(--accent-dark);}
+.btn.secondary:hover{background:var(--paper-alt);}
+.btn:disabled{opacity:.5;cursor:not-allowed;}
+.hint{color:var(--ink-soft);font-size:.9rem;text-align:center;}
+#sr-status{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;}
+@media (prefers-reduced-motion: reduce){.card-inner{transition:none;}}
+@media (max-width:500px){.face .content{font-size:1.2rem;}}
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to main content</a>
+<header class="top">
+<span class="eyebrow">Catalog Drawer</span>
+<h1>CUT2003flashcards</h1>
+</header>
+<main id="main">
+<div class="deck-meta"><span class="mono" id="progress"></span></div>
+<div class="stage">
+<button type="button" class="card-face" id="card-btn" aria-pressed="false">
+<span class="card-inner" id="card-inner">
+<span class="face front"><span class="idx mono" id="idx-front"></span><span class="face-badges"><span class="tag">Question</span></span><span class="content" id="front-text"></span></span>
+<span class="face back" aria-hidden="true"><span class="idx mono" id="idx-back"></span><span class="face-badges"><span class="tag">Answer</span></span><span class="content" id="back-text"></span><span class="verified-stamp-wrap" aria-hidden="true"><span class="verified-stamp-ring"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="verified-stamp-text">Verified<br>Correct</span></span></span></span>
+</span>
+</button>
+</div>
+<div class="controls">
+<button type="button" class="btn secondary" id="prev-btn">← Previous</button>
+<button type="button" class="btn" id="flip-btn">Flip card</button>
+<button type="button" class="btn secondary" id="next-btn">Next →</button>
+<button type="button" class="btn secondary" id="shuffle-btn">Shuffle</button>
+</div>
+<p class="hint">Press <kbd>Space</kbd> or <kbd>Enter</kbd> on the focused card to flip it, and use the ←/→ arrow keys to move between cards.</p>
+<div id="sr-status" aria-live="polite"></div>
+</main>
+<script>
+(function(){
+"use strict";
+var cards = [{"front":"What is the technical definition of a countersink in aviation manufacturing?","back":"A conical recess cut into a material so a fastener head sits flush with or below the surface."},{"front":"Why does a fastener protruding as little as $1/32$\" matter on an aircraft exterior?","back":"It creates turbulent airflow, increasing drag and reducing fuel efficiency."},{"front":"Term: Flush Fastener","back":"Definition: A rivet or screw whose head is level with the surrounding material surface with no protrusion."},{"front":"How does countersinking improve the fit-up of fuselage skins stacked on frames?","back":"It allows mating parts to lie flat against each other, preventing stress concentrations."},{"front":"Besides aerodynamics, what is the primary safety reason for using flush fasteners on interior floor panels?","back":"To eliminate trip and snag hazards for crew and passengers."},{"front":"Which three major components of an aircraft typically require thousands of flush rivets?","back":"Fuselage skins, wing surfaces, and control surfaces (e.g., flaps, elevators)."},{"front":"Term: Microstop","back":"Definition: A depth-limiting countersink cage that ensures consistent and repeatable hole depth."},{"front":"What tool is used as the primary quality control instrument to verify countersink diameter and depth?","back":"Countersink gauge."},{"front":"Term: Cutter Angle","back":"Definition: The included angle of a countersink tool, which must exactly match the fastener head angle."},{"front":"What relationship defines the 'Countersink Ratio'?","back":"The relationship between the countersink's diameter and its depth."},{"front":"Which type of countersink cutter is characterized by a single cutting edge and a tendency to 'chatter'?","back":"Single-flute countersink cutter."},{"front":"What is the most commonly used type of countersink cutter in aircraft assembly?","back":"Multi-flute (piloted) countersink cutter."},{"front":"What is the function of the central pilot pin on a multi-flute cutter?","back":"It fits into the pre-drilled hole to keep the cutter centered and reduce chatter."},{"front":"Why is a multi-flute cutter preferred over a single-flute cutter for production work?","back":"It produces cleaner, rounder countersinks with smoother material removal."},{"front":"What is the standard included angle for the majority of aviation flush rivets (e.g., MS20426)?","back":"$100^{\\circ}$."},{"front":"Why is an $82^{\\circ}$ countersink cutter restricted from use in aerospace applications?","back":"It is a general industry standard that prevents aerospace fasteners from seating correctly."},{"front":"Cutter Identification: Where are the specifications usually found on a countersink cutter?","back":"Stamped or engraved on the shank of the tool."},{"front":"What specific information does the 'Angle Marking' on a cutter shank provide?","back":"The included angle that must match the fastener specification."},{"front":"When selecting a cutter, how should the cutter's maximum diameter relate to the required countersink diameter?","back":"The cutter's maximum diameter must be larger than the required countersink diameter."},{"front":"What is the consequence of using a pilot size that does not match the pre-drilled hole?","back":"It causes chatter and results in off-center countersinks."},{"front":"How does a microstop cage limit the depth of a countersink?","back":"It limits the forward travel of the drill by contacting the workpiece surface."},{"front":"What part of a microstop tool allows the depth to be adjusted by thousandths of an inch?","back":"Depth adjustment ring (threaded collar)."},{"front":"What is the purpose of the 'Lock Ring' or 'Lock Nut' on a microstop?","back":"To secure the adjustment ring so the depth setting does not drift during production."},{"front":"Which part of the microstop tool rotates freely to avoid spinning against the workpiece surface?","back":"Nose piece (Cage body)."},{"front":"The _____ is the part of the microstop that holds interchangeable cutters of different angles and pilot sizes.","back":"Cutter holder (Collet)"},{"front":"What is the primary advantage of using a microstop over relying on operator 'feel'?","back":"It eliminates guesswork and ensures every hole is cut to the exact same depth."},{"front":"Identify the correct four-step sequence for setting up a microstop countersink tool.","back":"1. Install Cutter; 2. Set Depth Ring; 3. Test on Scrap; 4. Verify & Lock."},{"front":"Why must a test hole be drilled in scrap material of the same thickness as the workpiece?","back":"To verify the depth setting and prevent costly damage to the actual aircraft structure."},{"front":"What should an assembler check for when inspecting a cutter before use?","back":"Chips, dull edges, or any damage that could cause chatter."},{"front":"Step-by-Step Process: What must be done immediately after pre-drilling the pilot hole?","back":"Install the correct cutter in the microstop and adjust the depth ring using scrap."},{"front":"At what angle must a countersink cutter enter the material relative to the surface?","back":"Perpendicular ($90^{\\circ}$)."},{"front":"What is the result of tilting the drill during the countersinking process?","back":"An oval, off-center countersink that prevents the fastener from seating properly."},{"front":"What are the recommended speed and pressure settings for countersinking aluminum?","back":"Higher RPM and lighter pressure."},{"front":"Why is cutting fluid required when countersinking titanium?","back":"To manage heat and prevent work hardening of the material."},{"front":"What technique is required when countersinking composites (CFRP) to prevent delamination?","back":"Use low RPM, sharp diamond-coated cutters, and vacuum extraction for dust."},{"front":"Error Identification: What condition occurs when the fastener head drops below the material surface?","back":"Over-countersinking."},{"front":"How can an 'under-countersink' error typically be corrected?","back":"By resetting the microstop deeper and re-cutting the hole."},{"front":"What are the three most common causes of chatter or a rough countersink surface?","back":"Dull cutter, wrong pilot size, or excessive drill speed."},{"front":"How does a countersink gauge determine if a hole is at the correct depth?","back":"By measuring the diameter of the countersink opening, which is geometrically related to depth."},{"front":"In aircraft manufacturing, what is the standard tolerance for a countersink diameter?","back":"$\\pm 0.005$\"."},{"front":"What must an assembler do with the countersink gauge before measuring any holes?","back":"Zero the gauge on a flat reference surface."},{"front":"How often should an assembler check holes with a gauge during a production run?","back":"Periodically throughout the run to catch any drift in the microstop setting."},{"front":"Gauge Interpretation: What does a reading of $+0.005$\" represent?","back":"The upper tolerance limit; any larger and the hole is over-countersunk."},{"front":"Gauge Interpretation: What does a reading of $0.000$\" indicate?","back":"A perfect reading where the fastener head will sit exactly flush."},{"front":"Gauge Interpretation: What does a reading of $-0.005$\" represent?","back":"The lower tolerance limit; any smaller and the fastener will sit proud."},{"front":"What should you do if a countersink is too deep and falls outside of the allowable tolerance?","back":"Flag the part for engineering disposition as it may need to be scrapped or repaired."},{"front":"Which aircraft material is considered the most 'forgiving' to work with during countersinking?","back":"Aluminum."},{"front":"Term: Knife-Edge","back":"Definition: A condition in thin material where countersinking leaves the remaining material around the hole dangerously thin and weak."},{"front":"Why is a 'knife-edge' condition considered a structural defect?","back":"It makes the joint structurally weak and cannot be fixed by simply installing the fastener."},{"front":"Scenario: Your gauge reads $+0.008$\" on a test hole. What is the correct immediate action?","back":"Stop drilling and adjust the microstop depth ring to reduce the depth."},{"front":"Scenario: You find a small radial crack in a countersink wall. What are your first two steps?","back":"Stop work and document the location and size of the crack."},{"front":"Who must be notified immediately if an out-of-spec countersink or structural crack is discovered?","back":"The lead, supervisor, or quality inspector."},{"front":"What is the primary risk of running a drill at high speed in titanium or composites?","back":"Heat causes material damage and dimensional changes."},{"front":"According to the 'Workforce Connection,' which four major manufacturers demand mastery of countersinking?","back":"Boeing, Airbus, Spirit AeroSystems, and Textron Aviation."},{"front":"Why must an assembler stand directly over the work and keep their wrist locked while countersinking?","back":"To ensure the drill remains perpendicular ($90^{\\circ}$) to the surface."}];
+var order = cards.map(function(_, i){ return i; });
+var current = 0;
+var cardBtn = document.getElementById("card-btn");
+var frontText = document.getElementById("front-text");
+var backText = document.getElementById("back-text");
+var idxFront = document.getElementById("idx-front");
+var idxBack = document.getElementById("idx-back");
+var progressEl = document.getElementById("progress");
+var prevBtn = document.getElementById("prev-btn");
+var nextBtn = document.getElementById("next-btn");
+var flipBtn = document.getElementById("flip-btn");
+var shuffleBtn = document.getElementById("shuffle-btn");
+var srStatus = document.getElementById("sr-status");
+function shuffleArray(arr){ var a = arr.slice(); for (var i = a.length - 1; i > 0; i--){ var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+function renderCard(announce){
+  var c = cards[order[current]];
+  frontText.textContent = c.front;
+  backText.textContent = c.back;
+  idxFront.textContent = String(current + 1).padStart(3, "0");
+  idxBack.textContent = String(current + 1).padStart(3, "0");
+  cardBtn.setAttribute("aria-pressed", "false");
+  cardBtn.setAttribute("aria-label", "Question: " + c.front + ". Activate to show the answer.");
+  progressEl.textContent = "Card " + (current + 1) + " of " + cards.length;
+  if (announce) srStatus.textContent = "Card " + (current + 1) + " of " + cards.length + ". Question: " + c.front;
+  prevBtn.disabled = cards.length <= 1;
+  nextBtn.disabled = cards.length <= 1;
+}
+function flipCard(){
+  var pressed = cardBtn.getAttribute("aria-pressed") === "true";
+  var c = cards[order[current]];
+  if (pressed){
+    cardBtn.setAttribute("aria-pressed", "false");
+    cardBtn.setAttribute("aria-label", "Question: " + c.front + ". Activate to show the answer.");
+    srStatus.textContent = "Showing question: " + c.front;
+  } else {
+    cardBtn.setAttribute("aria-pressed", "true");
+    cardBtn.setAttribute("aria-label", "Verified answer: " + c.back + ". Activate to show the question.");
+    srStatus.textContent = "Showing verified answer: " + c.back;
+  }
+}
+function goTo(delta){
+  if (cards.length < 2) return;
+  current = (current + delta + cards.length) % cards.length;
+  renderCard(true);
+}
+cardBtn.addEventListener("click", flipCard);
+flipBtn.addEventListener("click", function(){ cardBtn.focus(); flipCard(); });
+prevBtn.addEventListener("click", function(){ goTo(-1); });
+nextBtn.addEventListener("click", function(){ goTo(1); });
+shuffleBtn.addEventListener("click", function(){ order = shuffleArray(order); current = 0; renderCard(false); srStatus.textContent = "Deck shuffled. Card 1 of " + cards.length; });
+document.addEventListener("keydown", function(e){
+  if (e.key === "ArrowLeft"){ e.preventDefault(); goTo(-1); }
+  else if (e.key === "ArrowRight"){ e.preventDefault(); goTo(1); }
+});
+if (cards.length){ renderCard(true); } else { progressEl.textContent = "No cards found."; }
+})();
+</script>
+</body>
+</html>
