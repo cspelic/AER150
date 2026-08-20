@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>POW2004flashcards — Flashcards</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#F3F0E7;--paper-alt:#ECE6D6;--card:#FFFFFF;--ink:#23201A;--ink-soft:#5B564A;--accent:#145A4A;--accent-dark:#0E463A;--accent-tab:#8B3A2F;--rule:#D9D2C1;--focus:#0E463A;--radius:10px;font-size:16px;}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{background:var(--paper);color:var(--ink);font-family:'Public Sans',system-ui,sans-serif;line-height:1.5;min-height:100vh;}
+h1{font-family:'Public Sans',system-ui,sans-serif;font-weight:800;letter-spacing:-.01em;margin:0 0 .3em;}
+.mono{font-family:'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.02em;}
+.skip-link{position:absolute;left:-999px;top:0;background:var(--accent-dark);color:#fff;padding:.75em 1.25em;z-index:100;border-radius:0 0 8px 0;font-weight:600;}
+.skip-link:focus{left:0;}
+:focus-visible{outline:3px solid var(--focus);outline-offset:3px;}
+header.top{border-bottom:2px solid var(--ink);padding:1.75rem 1.5rem 1.25rem;max-width:700px;margin:0 auto;}
+header.top .eyebrow{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:.8rem;letter-spacing:.12em;text-transform:uppercase;color:var(--accent-dark);background:var(--paper-alt);border:1px solid var(--rule);padding:.2em .6em;border-radius:4px;margin-bottom:.6rem;}
+main{max-width:700px;margin:0 auto;padding:1.5rem;}
+.deck-meta{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.6rem;margin-bottom:1rem;}
+.stage{perspective:1400px;max-width:560px;margin:0 auto 1.25rem;}
+.card-face{position:relative;width:100%;min-height:260px;border-radius:var(--radius);background:transparent;border:none;padding:0;cursor:pointer;display:block;}
+.card-inner{display:block;position:relative;width:100%;height:100%;min-height:260px;transition:transform .5s cubic-bezier(.4,.2,.2,1);transform-style:preserve-3d;}
+.card-face[aria-pressed="true"] .card-inner{transform:rotateY(180deg);}
+.face{position:absolute;inset:0;background:var(--card);border:1.5px solid var(--rule);border-radius:var(--radius);box-shadow:0 2px 0 var(--rule),0 10px 24px -12px rgba(35,32,26,.35);padding:2rem 1.75rem;display:flex;flex-direction:column;backface-visibility:hidden;-webkit-backface-visibility:hidden;}
+.face::before{content:"";position:absolute;left:1.75rem;right:1.75rem;top:3.2rem;height:2px;background:repeating-linear-gradient(to right,var(--rule) 0 10px,transparent 10px 16px);}
+.face .tag{font-family:'IBM Plex Mono',monospace;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:#fff;background:var(--accent-tab);padding:.25em .6em;border-radius:3px 3px 3px 0;}
+.face-badges{display:flex;align-items:center;gap:.5rem;align-self:flex-start;margin-bottom:1.4rem;}
+.verified-stamp-wrap{position:absolute;right:1.1rem;bottom:1.1rem;transform:rotate(-9deg);pointer-events:none;}
+.verified-stamp-ring{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.2rem;width:76px;height:76px;border-radius:50%;border:2px solid var(--accent);box-shadow:inset 0 0 0 3px var(--paper),inset 0 0 0 5px var(--accent);color:var(--accent);opacity:.88;}
+.verified-stamp-ring svg{flex:none;}
+.verified-stamp-text{font-family:'Public Sans',sans-serif;font-weight:800;font-size:.5rem;line-height:1.2;letter-spacing:.06em;text-align:center;text-transform:uppercase;}
+.face.back .tag{background:var(--accent-dark);}
+.face .content{font-family:'Public Sans',system-ui,sans-serif;font-weight:500;font-size:1.3rem;line-height:1.45;flex:1;display:flex;align-items:center;overflow-wrap:anywhere;}
+.face .idx{position:absolute;top:.9rem;right:1rem;font-family:'IBM Plex Mono',monospace;font-size:.75rem;color:var(--ink-soft);}
+.face.back{transform:rotateY(180deg);}
+.controls{display:flex;justify-content:center;align-items:center;gap:.6rem;flex-wrap:wrap;}
+.btn{font-family:'Public Sans',sans-serif;font-weight:600;font-size:.95rem;border-radius:8px;border:1.5px solid var(--accent-dark);background:var(--accent);color:#fff;padding:.7em 1.3em;min-height:44px;cursor:pointer;}
+.btn:hover{background:var(--accent-dark);}
+.btn.secondary{background:var(--card);color:var(--accent-dark);}
+.btn.secondary:hover{background:var(--paper-alt);}
+.btn:disabled{opacity:.5;cursor:not-allowed;}
+.hint{color:var(--ink-soft);font-size:.9rem;text-align:center;}
+#sr-status{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;}
+@media (prefers-reduced-motion: reduce){.card-inner{transition:none;}}
+@media (max-width:500px){.face .content{font-size:1.2rem;}}
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to main content</a>
+<header class="top">
+<span class="eyebrow">Catalog Drawer</span>
+<h1>POW2004flashcards</h1>
+</header>
+<main id="main">
+<div class="deck-meta"><span class="mono" id="progress"></span></div>
+<div class="stage">
+<button type="button" class="card-face" id="card-btn" aria-pressed="false">
+<span class="card-inner" id="card-inner">
+<span class="face front"><span class="idx mono" id="idx-front"></span><span class="face-badges"><span class="tag">Question</span></span><span class="content" id="front-text"></span></span>
+<span class="face back" aria-hidden="true"><span class="idx mono" id="idx-back"></span><span class="face-badges"><span class="tag">Answer</span></span><span class="content" id="back-text"></span><span class="verified-stamp-wrap" aria-hidden="true"><span class="verified-stamp-ring"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="verified-stamp-text">Verified<br>Correct</span></span></span></span>
+</span>
+</button>
+</div>
+<div class="controls">
+<button type="button" class="btn secondary" id="prev-btn">← Previous</button>
+<button type="button" class="btn" id="flip-btn">Flip card</button>
+<button type="button" class="btn secondary" id="next-btn">Next →</button>
+<button type="button" class="btn secondary" id="shuffle-btn">Shuffle</button>
+</div>
+<p class="hint">Press <kbd>Space</kbd> or <kbd>Enter</kbd> on the focused card to flip it, and use the ←/→ arrow keys to move between cards.</p>
+<div id="sr-status" aria-live="polite"></div>
+</main>
+<script>
+(function(){
+"use strict";
+var cards = [{"front":"Term: Compression Riveter","back":"Industrial Definition: A pneumatic tool that sets a rivet by squeezing both ends simultaneously."},{"front":"Term: Yoke","back":"Industrial Definition: The C-shaped frame that holds the dies in alignment and applies squeezing force around the workpiece."},{"front":"Term: Die","back":"Industrial Definition: A shaped insert that contacts the rivet head or tail to match specific profiles."},{"front":"Term: Upset","back":"Industrial Definition: The formed tail end of a rivet after it has been set, also called the \"shop head.\""},{"front":"Term: Pneumatic","back":"Industrial Definition: Powered by compressed air to ensure tool power and consistency in manufacturing."},{"front":"What tool used in hammer riveting is replaced by the compression riveter's fixed die?","back":"Bucking Bar"},{"front":"Contrast stationary vs. portable tools: What is the preferred use case for a Hand-Operated (Portable) Squeezer?","back":"Riveting in open or moderately accessible areas like fuselages where the tool is carried to the work."},{"front":"Contrast stationary vs. portable tools: What is the preferred use case for a Stationary (Bench or Machine) Squeezer?","back":"Panel pre-assembly or jig work where the workpiece is brought to the fixed tool."},{"front":"How does the force output of a hand squeezer typically compare to a stationary squeezer?","back":"A hand squeezer has moderate force output, while a stationary squeezer has high force output."},{"front":"In terms of operator skill, what does a hand squeezer require that a stationary squeezer largely automates?","back":"Positioning skill and manual alignment."},{"front":"Identify the tool component: The moving part inside the body that pushes the die into the rivet tail.","back":"Piston/Ram"},{"front":"What is the function of the Air Inlet & Regulator on a compression riveter?","back":"It controls the amount of compressed air entering the tool to ensure correct rivet upset."},{"front":"Why must the yoke be rigid enough to resist squeezing forces without deflecting?","back":"Any flex would produce an off-center shop head and a rejected rivet."},{"front":"Identify yoke shapes: C-Yoke","back":"Intended Reach: Accessing rivets set close to structural members in common fuselage and wing panel work."},{"front":"Identify yoke shapes: Alligator Yoke","back":"Intended Reach: Confined spaces where a rigid frame cannot be positioned easily, using a hinged jaw design."},{"front":"Identify yoke shapes: Offset Yoke","back":"Intended Reach: Accessing rivets at angles when the tool body cannot be positioned perpendicular to the surface."},{"front":"Identify yoke shapes: Long-Reach Yoke","back":"Intended Reach: Interior rivets located far from panel edges, common in stringer installations."},{"front":"Concept: Yoke Throat Depth","back":"Definition: The measurement that determines how far from the edge of a panel the riveter can reach."},{"front":"Identify the die component: The shaped surface that matches the rivet head profile (flat, flush, or universal).","back":"Die Face (Cavity)"},{"front":"Identify the die component: The cylindrical body that fits into the tool housing and is retained by a setscrew.","back":"Die Shank"},{"front":"What is the purpose of a die's Retaining Feature (groove, flat, or hole)?","back":"To interface with the tool's retaining mechanism and lock the die in place during operation."},{"front":"Why must die faces be polished and free of damage?","back":"To prevent scratching aircraft skin, which can initiate fatigue cracks."},{"front":"Which die type is used specifically with MS20470 rivets on interior structures?","back":"Universal / Button Die"},{"front":"What die type is required for aerodynamic surfaces using MS20426 rivets?","back":"Countersunk Die"},{"front":"For a countersunk die, what specific angle must the die match relative to the rivet?","back":"$100^{\\circ}$"},{"front":"Which die type is used on the shop head side to form the upset?","back":"Flat / Mushroom Die"},{"front":"Which die type is used to cradle rounded heads like brazier rivets to prevent slipping?","back":"Cupped Die"},{"front":"During die inspection, what does a bent shank indicate?","back":"Misalignment that will cause an off-center squeeze."},{"front":"Why is a worn retaining groove on a die shank considered a safety hazard?","back":"It can allow the die to back out and eject during the squeezing cycle."},{"front":"According to the Setup Overview, what is the mark of a professional technician?","back":"Getting the setup right the first time."},{"front":"Step 1 of Setup: How does a technician identify the correct die profile and size?","back":"By checking the rivet specification and part number on the work order."},{"front":"What is the consequence of using a die cavity that is too large for the rivet head?","back":"The rivet moves during the squeeze, creating an off-center or cocked head."},{"front":"Operational Step: Inserting the fixed die into the yoke.","back":"Safety Outcome: Ensures the die is properly aligned with the setscrew hole to prevent it from loosening."},{"front":"Operational Step: Tightening the setscrew against the die shank flat.","back":"Safety Outcome: Prevents the die from vibrating loose or ejecting without stripping the screw or cracking the housing."},{"front":"Operational Step: Pull-testing both dies by hand after installation.","back":"Safety Outcome: Confirms the dies are locked in place and will not eject during operation, preventing injury."},{"front":"Where should a technician check the air pressure for the most accurate reading?","back":"At the tool inlet."},{"front":"What is the typical air pressure range for most pneumatic squeezers?","back":"$90-110\\text{ psi}$"},{"front":"How does rivet diameter affect the required air pressure setting?","back":"Larger diameter rivets require more force/pressure."},{"front":"How does the alloy of a rivet (e.g., 2024-T4 vs. softer alloys) affect setup?","back":"Harder alloys require more squeezing force."},{"front":"Why must a test squeeze be performed on sample material rather than the actual aircraft part?","back":"To verify the setup without risking damage to production hardware."},{"front":"Acceptable Dimensions: The shop head width must be exactly _____ times the original rivet shank diameter.","back":"$1.5 \\times$"},{"front":"Acceptable Dimensions: The shop head height must be approximately _____ times the rivet shank diameter.","back":"$0.5 \\times$"},{"front":"What is the required skin contact specification for a manufactured rivet head?","back":"$100\\%$, sitting flush with no gaps or tilt."},{"front":"What tool is used to verify the final dimensions of the rivet upset?","back":"Rivet gauge"},{"front":"Pre-Installation: What is the risk of installing a rivet in a hole that is rough or has burrs?","back":"It can cause the rivet to cock during installation."},{"front":"Operational Step: Applying gentle hand pressure to the tool before triggering the squeeze.","back":"Safety Outcome: Holds the tool steady and confirms the dies are perfectly centered to prevent slips or defects."},{"front":"In the Step-by-Step sequence, what is the very first action taken when installing a rivet?","back":"Insert the rivet into the hole from the head side."},{"front":"Why is maintaining perpendicularity between the yoke and the work surface critical?","back":"A tilted tool applies uneven force, producing a \"smiling\" or cocked shop head."},{"front":"What simple shop trick can be used to verify the tool's angle before a squeeze?","back":"Laying a small square next to the tool."},{"front":"Identify the defect: The shop head is too small due to insufficient pressure.","back":"Underdriven"},{"front":"Identify the defect: The shop head is too large and the surrounding skin is dented.","back":"Overdriven"},{"front":"Identify the defect: The manufactured head is tilted and the shop head is off-center.","back":"Cocked Head"},{"front":"Identify the defect: A curved indentation in the skin beside the rivet head caused by die edge contact.","back":"Smiley / Crescent Mark"},{"front":"What must a technician do if a \"Smiley\" mark is found on the aircraft skin?","back":"Report it to a supervisor as it may require skin repair."},{"front":"Drilling Out: Why should the drill bit be one size smaller than the rivet shank diameter?","back":"To prevent oversizing the hole when the drill breaks through."},{"front":"What is the purpose of using a center punch on the rivet head before drilling?","back":"To keep the drill from walking off-center."},{"front":"Drilling Out: At what point should the technician stop drilling to avoid damaging the parent material?","back":"After drilling through the manufactured head only."},{"front":"After drilling the head, how is the remaining rivet shank removed from the hole?","back":"By using a punch and hammer to push it out from the shop head side."},{"front":"Operational Step: Depressurizing the air tool before changing dies or performing maintenance.","back":"Safety Outcome: Prevents accidental activation and the associated risk of pinch or ejection injuries."},{"front":"Operational Step: Using safety whip checks on all air hose connections.","back":"Safety Outcome: Prevents serious whipping hazards if an air hose fitting fails or blows off."},{"front":"Why is hearing protection recommended when using pneumatic tools over a full shift?","back":"The tools generate significant noise that can cause cumulative hearing damage."},{"front":"Daily Maintenance: How much pneumatic tool oil should be added to the air inlet before use?","back":"$1-2\\text{ drops}$"},{"front":"What is the purpose of cleaning metal chips and debris from the yoke throat after each shift?","back":"To prevent tool wear and ensure the tool is ready for consistent, quality results."},{"front":"According to the Industry Connection, what does a technician's signature on a work order certify?","back":"That the work was performed correctly according to approved FAA data."},{"front":"Why is even a single improperly set rivet in a critical joint considered dangerous?","back":"It can lead to structural failure of the aircraft."},{"front":"Scenario: If a test rivet measures $0.180\"$ wide on a $0.125\"$ shank, is it acceptable?","back":"No, because the width is only $1.44 \\times$ the diameter and the minimum is $1.5 \\times$."},{"front":"What is the calculated minimum acceptable width for a rivet with a $0.125\"$ diameter shank?","back":"$0.188\"$"},{"front":"What does the \"-4\" in a rivet part number like MS20470AD4 designate?","back":"The rivet shank diameter in $1/32\\text{nds}$ of an inch ($1/8\"$)."},{"front":"How should a technician respond if a tool makes unusual noises or shows inconsistent force?","back":"Tag it out and report the problem to a supervisor immediately."},{"front":"List the four main steps of the Setup Procedure in correct order.","back":"1. Select dies; 2. Install dies; 3. Set air pressure; 4. Verify with a test rivet."},{"front":"List the five main steps of the Installation Process in correct order.","back":"1. Insert rivet; 2. Position yoke; 3. Align dies; 4. Squeeze; 5. Inspect."},{"front":"Why are compression riveters considered faster than pneumatic rivet guns?","back":"They allow one technician to set the rivet completely without a second operator holding a bucking bar."},{"front":"What is the primary benefit of the smooth, controlled squeezing action of a compression riveter?","back":"It produces more uniform rivets, which reduces costly rework and scrap."},{"front":"In yoke geometry, what specific feature allows for interior riveting away from panel edges?","back":"Extended throat depth."},{"front":"Before setting any production rivets, what must be used as a sample for the test squeeze?","back":"Scrap material of the same alloy, thickness, and stack-up as the production part."}];
+var order = cards.map(function(_, i){ return i; });
+var current = 0;
+var cardBtn = document.getElementById("card-btn");
+var frontText = document.getElementById("front-text");
+var backText = document.getElementById("back-text");
+var idxFront = document.getElementById("idx-front");
+var idxBack = document.getElementById("idx-back");
+var progressEl = document.getElementById("progress");
+var prevBtn = document.getElementById("prev-btn");
+var nextBtn = document.getElementById("next-btn");
+var flipBtn = document.getElementById("flip-btn");
+var shuffleBtn = document.getElementById("shuffle-btn");
+var srStatus = document.getElementById("sr-status");
+function shuffleArray(arr){ var a = arr.slice(); for (var i = a.length - 1; i > 0; i--){ var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+function renderCard(announce){
+  var c = cards[order[current]];
+  frontText.textContent = c.front;
+  backText.textContent = c.back;
+  idxFront.textContent = String(current + 1).padStart(3, "0");
+  idxBack.textContent = String(current + 1).padStart(3, "0");
+  cardBtn.setAttribute("aria-pressed", "false");
+  cardBtn.setAttribute("aria-label", "Question: " + c.front + ". Activate to show the answer.");
+  progressEl.textContent = "Card " + (current + 1) + " of " + cards.length;
+  if (announce) srStatus.textContent = "Card " + (current + 1) + " of " + cards.length + ". Question: " + c.front;
+  prevBtn.disabled = cards.length <= 1;
+  nextBtn.disabled = cards.length <= 1;
+}
+function flipCard(){
+  var pressed = cardBtn.getAttribute("aria-pressed") === "true";
+  var c = cards[order[current]];
+  if (pressed){
+    cardBtn.setAttribute("aria-pressed", "false");
+    cardBtn.setAttribute("aria-label", "Question: " + c.front + ". Activate to show the answer.");
+    srStatus.textContent = "Showing question: " + c.front;
+  } else {
+    cardBtn.setAttribute("aria-pressed", "true");
+    cardBtn.setAttribute("aria-label", "Verified answer: " + c.back + ". Activate to show the question.");
+    srStatus.textContent = "Showing verified answer: " + c.back;
+  }
+}
+function goTo(delta){
+  if (cards.length < 2) return;
+  current = (current + delta + cards.length) % cards.length;
+  renderCard(true);
+}
+cardBtn.addEventListener("click", flipCard);
+flipBtn.addEventListener("click", function(){ cardBtn.focus(); flipCard(); });
+prevBtn.addEventListener("click", function(){ goTo(-1); });
+nextBtn.addEventListener("click", function(){ goTo(1); });
+shuffleBtn.addEventListener("click", function(){ order = shuffleArray(order); current = 0; renderCard(false); srStatus.textContent = "Deck shuffled. Card 1 of " + cards.length; });
+document.addEventListener("keydown", function(e){
+  if (e.key === "ArrowLeft"){ e.preventDefault(); goTo(-1); }
+  else if (e.key === "ArrowRight"){ e.preventDefault(); goTo(1); }
+});
+if (cards.length){ renderCard(true); } else { progressEl.textContent = "No cards found."; }
+})();
+</script>
+</body>
+</html>
