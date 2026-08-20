@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FAS2012flashcards — Flashcards</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#F3F0E7;--paper-alt:#ECE6D6;--card:#FFFFFF;--ink:#23201A;--ink-soft:#5B564A;--accent:#145A4A;--accent-dark:#0E463A;--accent-tab:#8B3A2F;--rule:#D9D2C1;--focus:#0E463A;--radius:10px;font-size:16px;}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{background:var(--paper);color:var(--ink);font-family:'Public Sans',system-ui,sans-serif;line-height:1.5;min-height:100vh;}
+h1{font-family:'Public Sans',system-ui,sans-serif;font-weight:800;letter-spacing:-.01em;margin:0 0 .3em;}
+.mono{font-family:'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.02em;}
+.skip-link{position:absolute;left:-999px;top:0;background:var(--accent-dark);color:#fff;padding:.75em 1.25em;z-index:100;border-radius:0 0 8px 0;font-weight:600;}
+.skip-link:focus{left:0;}
+:focus-visible{outline:3px solid var(--focus);outline-offset:3px;}
+header.top{border-bottom:2px solid var(--ink);padding:1.75rem 1.5rem 1.25rem;max-width:700px;margin:0 auto;}
+header.top .eyebrow{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:.8rem;letter-spacing:.12em;text-transform:uppercase;color:var(--accent-dark);background:var(--paper-alt);border:1px solid var(--rule);padding:.2em .6em;border-radius:4px;margin-bottom:.6rem;}
+main{max-width:700px;margin:0 auto;padding:1.5rem;}
+.deck-meta{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.6rem;margin-bottom:1rem;}
+.stage{perspective:1400px;max-width:560px;margin:0 auto 1.25rem;}
+.card-face{position:relative;width:100%;min-height:260px;border-radius:var(--radius);background:transparent;border:none;padding:0;cursor:pointer;display:block;}
+.card-inner{display:block;position:relative;width:100%;height:100%;min-height:260px;transition:transform .5s cubic-bezier(.4,.2,.2,1);transform-style:preserve-3d;}
+.card-face[aria-pressed="true"] .card-inner{transform:rotateY(180deg);}
+.face{position:absolute;inset:0;background:var(--card);border:1.5px solid var(--rule);border-radius:var(--radius);box-shadow:0 2px 0 var(--rule),0 10px 24px -12px rgba(35,32,26,.35);padding:2rem 1.75rem;display:flex;flex-direction:column;backface-visibility:hidden;-webkit-backface-visibility:hidden;}
+.face::before{content:"";position:absolute;left:1.75rem;right:1.75rem;top:3.2rem;height:2px;background:repeating-linear-gradient(to right,var(--rule) 0 10px,transparent 10px 16px);}
+.face .tag{font-family:'IBM Plex Mono',monospace;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:#fff;background:var(--accent-tab);padding:.25em .6em;border-radius:3px 3px 3px 0;}
+.face-badges{display:flex;align-items:center;gap:.5rem;align-self:flex-start;margin-bottom:1.4rem;}
+.verified-stamp-wrap{position:absolute;right:1.1rem;bottom:1.1rem;transform:rotate(-9deg);pointer-events:none;}
+.verified-stamp-ring{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.2rem;width:76px;height:76px;border-radius:50%;border:2px solid var(--accent);box-shadow:inset 0 0 0 3px var(--paper),inset 0 0 0 5px var(--accent);color:var(--accent);opacity:.88;}
+.verified-stamp-ring svg{flex:none;}
+.verified-stamp-text{font-family:'Public Sans',sans-serif;font-weight:800;font-size:.5rem;line-height:1.2;letter-spacing:.06em;text-align:center;text-transform:uppercase;}
+.face.back .tag{background:var(--accent-dark);}
+.face .content{font-family:'Public Sans',system-ui,sans-serif;font-weight:500;font-size:1.3rem;line-height:1.45;flex:1;display:flex;align-items:center;overflow-wrap:anywhere;}
+.face .idx{position:absolute;top:.9rem;right:1rem;font-family:'IBM Plex Mono',monospace;font-size:.75rem;color:var(--ink-soft);}
+.face.back{transform:rotateY(180deg);}
+.controls{display:flex;justify-content:center;align-items:center;gap:.6rem;flex-wrap:wrap;}
+.btn{font-family:'Public Sans',sans-serif;font-weight:600;font-size:.95rem;border-radius:8px;border:1.5px solid var(--accent-dark);background:var(--accent);color:#fff;padding:.7em 1.3em;min-height:44px;cursor:pointer;}
+.btn:hover{background:var(--accent-dark);}
+.btn.secondary{background:var(--card);color:var(--accent-dark);}
+.btn.secondary:hover{background:var(--paper-alt);}
+.btn:disabled{opacity:.5;cursor:not-allowed;}
+.hint{color:var(--ink-soft);font-size:.9rem;text-align:center;}
+#sr-status{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;}
+@media (prefers-reduced-motion: reduce){.card-inner{transition:none;}}
+@media (max-width:500px){.face .content{font-size:1.2rem;}}
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to main content</a>
+<header class="top">
+<span class="eyebrow">Catalog Drawer</span>
+<h1>FAS2012flashcards</h1>
+</header>
+<main id="main">
+<div class="deck-meta"><span class="mono" id="progress"></span></div>
+<div class="stage">
+<button type="button" class="card-face" id="card-btn" aria-pressed="false">
+<span class="card-inner" id="card-inner">
+<span class="face front"><span class="idx mono" id="idx-front"></span><span class="face-badges"><span class="tag">Question</span></span><span class="content" id="front-text"></span></span>
+<span class="face back" aria-hidden="true"><span class="idx mono" id="idx-back"></span><span class="face-badges"><span class="tag">Answer</span></span><span class="content" id="back-text"></span><span class="verified-stamp-wrap" aria-hidden="true"><span class="verified-stamp-ring"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="verified-stamp-text">Verified<br>Correct</span></span></span></span>
+</span>
+</button>
+</div>
+<div class="controls">
+<button type="button" class="btn secondary" id="prev-btn">← Previous</button>
+<button type="button" class="btn" id="flip-btn">Flip card</button>
+<button type="button" class="btn secondary" id="next-btn">Next →</button>
+<button type="button" class="btn secondary" id="shuffle-btn">Shuffle</button>
+</div>
+<p class="hint">Press <kbd>Space</kbd> or <kbd>Enter</kbd> on the focused card to flip it, and use the ←/→ arrow keys to move between cards.</p>
+<div id="sr-status" aria-live="polite"></div>
+</main>
+<script>
+(function(){
+"use strict";
+var cards = [{"front":"What occurs if an aircraft fastener is tightened too loosely?","back":"The part can vibrate free mid-flight."},{"front":"What is the potential consequence of over-tightening a fitting on an aircraft?","back":"The fitting may crack or the threads may strip."},{"front":"The FAA requires that fasteners on certified aircraft be tightened to _____.","back":"exact specifications"},{"front":"Term: Torque","back":"Definition: A rotational force applied around an axis, measured as force $\\times$ distance."},{"front":"Term: Fastener","back":"Definition: Any bolt, nut, or screw used to join aircraft components together."},{"front":"Term: Torque Wrench","back":"Definition: A precision tool designed to apply a specific, measurable amount of rotational force."},{"front":"Term: Calibration","back":"Definition: The process of verifying and adjusting a torque tool to ensure its accuracy."},{"front":"Term: Torque Specification","back":"Definition: The exact torque value listed in a manufacturer's or FAA-approved maintenance manual."},{"front":"Formula: Torque ($T$)","back":"$T = Force (F) \\times Distance (d)$"},{"front":"How does increasing handle length affect torque if the applied force remains the same?","back":"It increases the torque generated due to mechanical leverage."},{"front":"A beam-type torque wrench uses a visual pointer to indicate torque and is best used for _____.","back":"learning fundamentals in a shop or classroom setting"},{"front":"How often does a beam-type torque wrench typically require calibration?","back":"Rarely, as it has no internal mechanism to drift."},{"front":"The most widely used torque tool in aviation production is the _____.","back":"click-type torque wrench"},{"front":"A click-type torque wrench is best suited for _____.","back":"production environments with high bolt counts"},{"front":"What is the calibration requirement for a click-type torque wrench?","back":"It must be calibrated regularly due to its internal spring mechanism."},{"front":"What storage step is required for a click-type torque wrench to preserve calibration?","back":"Return the setting to its lowest value to relieve spring tension."},{"front":"Which torque tool offers the highest precision, often $\\pm 1\\%$ or better?","back":"Digital (electronic) torque wrench"},{"front":"A digital torque wrench is best used for _____.","back":"high-precision work and tasks requiring data traceability/logging"},{"front":"How does the calibration requirement of a digital torque wrench compare to a beam-type?","back":"Digital wrenches require periodic calibration, whereas beam-types rarely do."},{"front":"What is a primary advantage of a dial-type torque wrench?","back":"It provides a continuous, live readout useful for checking existing fastener tightness."},{"front":"A dial-type torque wrench is best suited for _____.","back":"quality inspection and auditing tasks"},{"front":"Which tool should be selected for torquing small fasteners on avionics panels or interior trim?","back":"Torque screwdriver"},{"front":"What is the typical range for an aviation torque screwdriver?","back":"$0\\text{--}40\\text{ in}\\cdot\\text{lb}$"},{"front":"What is the calibration requirement for a torque screwdriver?","back":"It requires regular calibration to maintain accuracy for delicate fasteners."},{"front":"Comparing precision: How do beam-type and digital torque wrenches differ?","back":"Beam-type is a simple visual indicator with lower precision, while digital tools use microprocessors for $\\pm 1\\%$ accuracy."},{"front":"What is the primary FAA reference for acceptable methods and practices in aircraft repair?","back":"FAA Advisory Circular AC 43.13-1B"},{"front":"Where must a technician look to find the exact torque value for a specific aircraft fastener?","back":"The Aircraft Maintenance Manual (AMM)"},{"front":"The three main units of torque measurement used in aviation are _____.","back":"inch-pounds ($\\text{in}\\cdot\\text{lb}$), foot-pounds ($\\text{ft}\\cdot\\text{lb}$), and Newton-meters ($\\text{N}\\cdot\\text{m}$)"},{"front":"How many inch-pounds are in one foot-pound?","back":"$12\\text{ in}\\cdot\\text{lb}$"},{"front":"Mnemonic: To remember the fundamental conversion factor between $\\text{in}\\cdot\\text{lb}$ and $\\text{ft}\\cdot\\text{lb}$.","back":"\"A foot has 12 inches.\""},{"front":"What is the conversion factor to change $\\text{in}\\cdot\\text{lb}$ to $\\text{N}\\cdot\\text{m}$?","back":"Multiply by $0.113$."},{"front":"Mnemonic: To remember the conversion factor from inch-pounds to Newton-meters.","back":"\"Inch to Newton is Point One One Three ($0.113$).\""},{"front":"What is the conversion factor to change $\\text{N}\\cdot\\text{m}$ back to $\\text{in}\\cdot\\text{lb}$?","back":"Multiply by $8.851$."},{"front":"Mnemonic: To remember the conversion factor from Newton-meters back to inch-pounds.","back":"\"Newton to Inch is Eight-Eight-Five-One ($8.851$).\""},{"front":"Practice Prompt: Convert $60\\text{ in}\\cdot\\text{lb}$ to $\\text{ft}\\cdot\\text{lb}$.","back":"$5\\text{ ft}\\cdot\\text{lb}$ ($60 \\div 12 = 5$)"},{"front":"Practice Prompt: Convert $35\\text{ ft}\\cdot\\text{lb}$ to $\\text{in}\\cdot\\text{lb}$.","back":"$420\\text{ in}\\cdot\\text{lb}$ ($35 \\times 12 = 420$)"},{"front":"Practice Prompt: Convert $150\\text{ in}\\cdot\\text{lb}$ to $\\text{N}\\cdot\\text{m}$.","back":"$16.95\\text{ N}\\cdot\\text{m}$ ($150 \\times 0.113 = 16.95$)"},{"front":"Practice Prompt: Convert $25\\text{ N}\\cdot\\text{m}$ to $\\text{in}\\cdot\\text{lb}$.","back":"$221.3\\text{ in}\\cdot\\text{lb}$ ($25 \\times 8.851 = 221.275$)"},{"front":"What is the massive over-torque error caused by using $\\text{ft}\\cdot\\text{lb}$ instead of $\\text{in}\\cdot\\text{lb}$?","back":"The fastener is over-torqued by $12\\times$ the specified amount."},{"front":"A torque wrench is considered most accurate when used within which part of its rated range?","back":"The middle $20\\%\\text{--}80\\%$ of the range."},{"front":"What is the risk of using a torque wrench below $20\\%$ of its rated capacity?","back":"The internal mechanism may not engage fully, leading to inaccurate readings."},{"front":"What is the risk of using a torque wrench above $80\\%$ of its rated capacity?","back":"It may overload the mechanism and void the tool's calibration."},{"front":"In addition to regular intervals, when must an aviation torque tool be re-calibrated?","back":"After any event that may have damaged it, such as being dropped or overloaded."},{"front":"What four items should be checked on a calibration sticker before using a tool?","back":"Calibration Date, Expiration Date, Tool ID Number, and Calibration Lab Stamp."},{"front":"What is the rule regarding the use of a torque wrench with an expired calibration sticker?","back":"Do not use the tool; tag it out of service and request a calibrated replacement."},{"front":"When using a click-type wrench, why must you cease turning the moment the click is felt?","back":"Continuing to turn adds uncontrolled torque beyond the target specification."},{"front":"Reading a beam-type scale at an angle causes an inaccurate reading known as _____.","back":"parallax error"},{"front":"What is a torque witness mark (or torque seal)?","back":"A stripe of lacquer or paint applied across the fastener and structure to visually confirm torque was applied."},{"front":"What does a broken witness mark indicate to an inspector?","back":"The fastener has rotated or loosened after the initial torquing."},{"front":"Why are cheater bars prohibited in aviation torque application?","back":"They increase leverage unpredictably, changing the effective torque from what is set on the wrench."},{"front":"How does ignoring lubrication specifications affect torque results?","back":"Using oil on a \"dry\" spec fastener can result in excessive clamping force even at the correct torque value."},{"front":"Why are composite aircraft structures more sensitive to over-torque than aluminum?","back":"Composites can crack or delaminate internally from slight over-torque, creating hidden safety hazards."},{"front":"What happens if a bonded insert is pulled out of a composite panel due to over-torque?","back":"It requires an extensive and expensive repair."},{"front":"Why is it forbidden to use a torque wrench as a breaker bar?","back":"The force required to loosen stuck fasteners overloads and damages the precision internal mechanism."},{"front":"What is the required procedure if a torque wrench is dropped on the shop floor?","back":"Report the drop immediately and remove the tool from service for re-calibration."},{"front":"Which professional role is responsible for torquing engine mount hardware and cylinder heads?","back":"Powerplant Mechanic"},{"front":"Which professional role uses torque tools daily to assemble airframe components?","back":"Structures Assembler"},{"front":"Which professional role verifies torque witness marks and audits calibration records?","back":"Quality Inspector"},{"front":"What determines if a fastener is \"critical\" in aircraft assembly?","back":"Every fastener is considered critical; every one has a specification for a reason."},{"front":"Practice Prompt: Convert $96\\text{ in}\\cdot\\text{lb}$ to $\\text{ft}\\cdot\\text{lb}$.","back":"$8\\text{ ft}\\cdot\\text{lb}$ ($96 \\div 12 = 8$)"},{"front":"Practice Prompt: Convert $18\\text{ N}\\cdot\\text{m}$ to $\\text{in}\\cdot\\text{lb}$.","back":"$159\\text{ in}\\cdot\\text{lb}$ ($18 \\times 8.851 = 159.3$, rounded to the nearest whole number)"},{"front":"Scenario: You need to torque a bolt to $8\\text{ in}\\cdot\\text{lb}$ and have a $0\\text{--}600\\text{ in}\\cdot\\text{lb}$ beam wrench. Is this tool appropriate?","back":"No, because $8\\text{ in}\\cdot\\text{lb}$ is far below the accurate middle $20\\%\\text{--}80\\%$ range of that wrench."},{"front":"Why must a technician reference the manual every single time rather than torquing from memory?","back":"To ensure compliance with the specific FAA-approved data for that exact aircraft and fastener."},{"front":"What maintenance step should be recorded and signed off to meet regulatory requirements after torquing?","back":"The documentation of the completed torque operation and the application of witness marks."}];
+var order = cards.map(function(_, i){ return i; });
+var current = 0;
+var cardBtn = document.getElementById("card-btn");
+var frontText = document.getElementById("front-text");
+var backText = document.getElementById("back-text");
+var idxFront = document.getElementById("idx-front");
+var idxBack = document.getElementById("idx-back");
+var progressEl = document.getElementById("progress");
+var prevBtn = document.getElementById("prev-btn");
+var nextBtn = document.getElementById("next-btn");
+var flipBtn = document.getElementById("flip-btn");
+var shuffleBtn = document.getElementById("shuffle-btn");
+var srStatus = document.getElementById("sr-status");
+function shuffleArray(arr){ var a = arr.slice(); for (var i = a.length - 1; i > 0; i--){ var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+function renderCard(announce){
+  var c = cards[order[current]];
+  frontText.textContent = c.front;
+  backText.textContent = c.back;
+  idxFront.textContent = String(current + 1).padStart(3, "0");
+  idxBack.textContent = String(current + 1).padStart(3, "0");
+  cardBtn.setAttribute("aria-pressed", "false");
+  cardBtn.setAttribute("aria-label", "Question: " + c.front + ". Activate to show the answer.");
+  progressEl.textContent = "Card " + (current + 1) + " of " + cards.length;
+  if (announce) srStatus.textContent = "Card " + (current + 1) + " of " + cards.length + ". Question: " + c.front;
+  prevBtn.disabled = cards.length <= 1;
+  nextBtn.disabled = cards.length <= 1;
+}
+function flipCard(){
+  var pressed = cardBtn.getAttribute("aria-pressed") === "true";
+  var c = cards[order[current]];
+  if (pressed){
+    cardBtn.setAttribute("aria-pressed", "false");
+    cardBtn.setAttribute("aria-label", "Question: " + c.front + ". Activate to show the answer.");
+    srStatus.textContent = "Showing question: " + c.front;
+  } else {
+    cardBtn.setAttribute("aria-pressed", "true");
+    cardBtn.setAttribute("aria-label", "Verified answer: " + c.back + ". Activate to show the question.");
+    srStatus.textContent = "Showing verified answer: " + c.back;
+  }
+}
+function goTo(delta){
+  if (cards.length < 2) return;
+  current = (current + delta + cards.length) % cards.length;
+  renderCard(true);
+}
+cardBtn.addEventListener("click", flipCard);
+flipBtn.addEventListener("click", function(){ cardBtn.focus(); flipCard(); });
+prevBtn.addEventListener("click", function(){ goTo(-1); });
+nextBtn.addEventListener("click", function(){ goTo(1); });
+shuffleBtn.addEventListener("click", function(){ order = shuffleArray(order); current = 0; renderCard(false); srStatus.textContent = "Deck shuffled. Card 1 of " + cards.length; });
+document.addEventListener("keydown", function(e){
+  if (e.key === "ArrowLeft"){ e.preventDefault(); goTo(-1); }
+  else if (e.key === "ArrowRight"){ e.preventDefault(); goTo(1); }
+});
+if (cards.length){ renderCard(true); } else { progressEl.textContent = "No cards found."; }
+})();
+</script>
+</body>
+</html>
